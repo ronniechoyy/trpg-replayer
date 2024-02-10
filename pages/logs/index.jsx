@@ -170,7 +170,7 @@ export default function Home() {
     <>
       <div className=" absolute inset-0 bg-[#333] text-[#eee]">
         <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px]">
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[20px] text-[25px] flex justify-between items-center gap-[5px]">
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[10px] text-[25px] flex justify-between items-center gap-[5px]">
             <Link className=" cursor-pointer select-none" href={'/'} >TRPG Replayer Beta v0.0.1</Link>
             <div className="flex gap-[5px]">
               <select className="text-[15px] text-right bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id="" 
@@ -191,7 +191,7 @@ export default function Home() {
             </div>
             
           </div>
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[20px] text-[25px] flex flex-col gap-[5px]">
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[10px] text-[25px] flex flex-col gap-[5px]">
 
             <div className="flex gap-[5px] text-[15px]">
               <Butthole theme={'dark'} className={'p-[12px] flex gap-[5px]'} onClick={() => { uploader_state[1](true) }}>
