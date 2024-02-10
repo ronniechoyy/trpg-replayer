@@ -105,6 +105,7 @@ function Uploader({ onUploaded }) {
       <input
         ref={fileInput}
         type="file"
+        multiple
         style={{ display: 'none' }}
         accept=".json,.html,.txt"
         onChange={(e) => handleFiles(e.target.files)}
@@ -149,11 +150,22 @@ function Replay_block({ title = 'Title', description = "Description", progress =
           <div className="text-[15px]"><Tran text={'Progresstion'} lang={lang[0]} /></div>
           <div className="text-[35px]">{progress} %</div>
         </div>
-        <Link href={url}>
-          <Butthole theme={'dark'} className={'p-[12px]'} onClick={() => { }}>
-            <div className="g_i">play_arrow</div>
+        <div className="flex flex-col gap-[5px]">
+          <Link href={url}>
+            <Butthole theme={'dark'} className={'p-[12px] h-[50px] flex items-center justify-center'} onClick={() => { }}>
+              <div className="g_i">play_arrow</div>
+            </Butthole>
+          </Link>
+          <Butthole theme={'dark'} className={'p-[12px] h-[15px] flex items-center justify-center'} onClick={() => {
+            confirm('Are you sure to delete this log?') &&
+              localStorage.removeItem(description);
+            window.dispatchEvent(new Event('localStorageChange'));
+          }}>
+            <div className="g_i text-[15px]">delete</div>
           </Butthole>
-        </Link>
+
+        </div>
+        
         
 
       </div>
@@ -170,9 +182,9 @@ export default function Home() {
     <>
       <div className=" absolute inset-0 bg-[#333] text-[#eee]">
         <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px]">
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[10px] text-[25px] flex justify-between items-center gap-[5px]">
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[20px] flex justify-between items-center gap-[5px]">
             <Link className=" cursor-pointer select-none" href={'/'} >TRPG Replayer Beta v0.0.1</Link>
-            <div className="flex gap-[5px]">
+            <div className="flex gap-[15px]">
               <select className="text-[15px] text-right bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id="" 
               value={lang[0]} onChange={(v) => { lang[1](v.target.value) }}>
                 <option value="zh-TW">Chinese (Traditional)</option>
@@ -197,7 +209,7 @@ export default function Home() {
               <Butthole theme={'dark'} className={'p-[12px] flex gap-[5px]'} onClick={() => { uploader_state[1](true) }}>
                 <div className="g_i">upload</div>
                 
-                <Tran text={'Upload logs'} lang={lang[0]} />
+                <Tran text={'Open logs'} lang={lang[0]} />
               </Butthole>
               <Butthole theme={'dark'} className={'p-[12px] flex gap-[5px]'} onClick={() => { }}>
                 <div className="g_i">delete</div>
