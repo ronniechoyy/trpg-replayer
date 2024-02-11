@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { createRef, useState, useEffect, useContext } from "react";
 import { LangContext } from "../_app";
+import Head from "next/head";
 
 
 function Replay_handler() {
@@ -174,16 +175,27 @@ function Replay_block({ title = 'Title', description = "Description", progress =
   )
 }
 
-export default function Home() {
+export default function Logs() {
   const router = useRouter();
   const uploader_state = useState(false);
   const lang = useContext(LangContext);
   return (
     <>
+      <Head>
+        <title>Logs - TRPG Replayer</title>
+        <meta name="description" content="A simple tool to replay your TRPG sessions" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <div className=" absolute inset-0 bg-[#333] text-[#eee]">
         <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px]">
           <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[20px] flex justify-between items-center gap-[5px]">
-            <Link className=" cursor-pointer select-none" href={'/'} >TRPG Replayer Beta v0.0.1</Link>
+            <div className="flex gap-[15px]">
+              <Link className=" cursor-pointer select-none" href={'/'} >TRPG Replayer Beta v0.0.1</Link>
+              <Link className=" cursor-pointer select-none flex items-center gap-[5px]" href={'https://github.com/ronniechoyy/trpg-replayer'} >
+                <div className="text-[15px]">by RONI</div>
+                <img className="w-[20px] object-contain invert" src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="RONI GIT" /></Link>
+            </div>
+            
             <div className="flex gap-[15px]">
               <select className="text-[15px] text-right bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id="" 
               value={lang[0]} onChange={(v) => { lang[1](v.target.value) }}>

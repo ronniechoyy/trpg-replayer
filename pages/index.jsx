@@ -3,12 +3,18 @@ import Tran from "@/lib/translater";
 import { useRouter } from "next/router";
 import { LangContext } from "./_app";
 import { useContext } from "react";
+import Head from "next/head";
 
 export default function Home() {
   const lang = useContext(LangContext);
   const router = useRouter();
   return (
     <>
+    <Head>
+      <title>TRPG Replayer</title>
+      <meta name="description" content="A simple tool to replay your TRPG sessions" />
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
       <div className=" absolute inset-0 flex text-center justify-center items-center bg-[#333] text-[#eee]">
         <div>
           <div className=" font-[600] text-[30px]">

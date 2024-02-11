@@ -5,6 +5,7 @@ import { createRef, useState, useEffect, useContext } from "react";
 import keywords from "@/lib/keywords";
 import Tran from "@/lib/translater";
 import { LangContext } from "@/pages/_app";
+import Head from "next/head";
 
 function findItem(matchingCondition) {
   for (let i = 0; i < localStorage.length; i++) {
@@ -320,23 +321,30 @@ export default function log_player() {
   const router = useRouter();
 
   return (
-    <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">
+    <>
+      <Head>
+        <title>{log_file_name} - TRPG Replayer </title>
+        <meta name="description" content="A simple tool to replay your TRPG sessions" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">
 
-      <div className="flex flex-col text-center justify-center items-center p-[5px_5px_0px_5px] gap-[5px]">
-        <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px] text-[20px] flex justify-between items-center gap-[5px]">
-          <Link className=" cursor-pointer select-none flex gap-[5px] items-center" href={'/logs'} >
-            <div className="g_i">keyboard_arrow_left</div>
-            <div className=" text-[20px]">{log_file_name}</div>
-          </Link>
+        <div className="flex flex-col text-center justify-center items-center p-[5px_5px_0px_5px] gap-[5px]">
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px] text-[20px] flex justify-between items-center gap-[5px]">
+            <Link className=" cursor-pointer select-none flex gap-[5px] items-center" href={'/logs'} >
+              <div className="g_i">keyboard_arrow_left</div>
+              <div className=" text-[20px]">{log_file_name}</div>
+            </Link>
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px] flex-grow overflow-hidden">
-        <div className=" @container bg-[#555] h-[100%] w-[100%] rounded-[5px] p-[5px] text-[25px] flex justify-between items-center gap-[5px] overflow-hidden">
-          <Log_reader log_file_name={log_file_name} />
+        <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px] flex-grow overflow-hidden">
+          <div className=" @container bg-[#555] h-[100%] w-[100%] rounded-[5px] p-[5px] text-[25px] flex justify-between items-center gap-[5px] overflow-hidden">
+            <Log_reader log_file_name={log_file_name} />
+          </div>
         </div>
-      </div>
 
-    </div>
+      </div>
+    </>
   );
 }
