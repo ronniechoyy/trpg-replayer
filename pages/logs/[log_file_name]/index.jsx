@@ -65,6 +65,139 @@ function rgbToHex(rgb) {
   return "#" + r + g + b;
 }
 
+function Character_panel({log_charactors, char_update_color, color_randomize, cycleSortOption, sortOption, sortedCharacters, lang}){
+  const panel_state = useState(true);
+  const char_state = useState([
+    { name: 'HP', value: null, max: null, min: 0 },
+    { name: 'MP', value: null, max: null, min: 0 },
+    { name: 'SAN', value: null, max: null, min: 0 },
+  ])
+  const char_ability = useState([
+    { name: 'STR', value: null },
+    { name: 'CON', value: null },
+    { name: 'POW', value: null },
+    { name: 'DEX', value: null },
+    { name: 'SAP', value: null },
+    { name: 'SIZ', value: null },
+    { name: 'INT', value: null },
+    { name: 'EDU', value: null },
+  ])
+
+  function Stat_block({name, value, max}){
+    return(
+      <div style={{
+        backgroundImage: `linear-gradient(90deg, #666 ${value / max * 100}%, #333 ${value / max * 100}%)`
+      }}>{`${name} ${value??'??'}/${max??'??'}`}</div>
+    )
+  }
+  
+  function Abliity_block({name, value}){
+    return (
+      <div className="flex flex-col">
+        <div>{name}</div>
+        <div>{value??'??'}</div>
+      </div>
+    )
+  }
+
+  return(
+    <div className="char_container">
+      {panel_state[0] ?
+        <div className="text-[15px] flex justify-center items-center gap-[5px] select-none cursor-pointer" onClick={()=>{panel_state[1](false);}}>
+          <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{sortedCharacters.length}</div>
+          <Tran text={`Charactors`} lang={lang[0]} />
+          <div className="g_i">keyboard_arrow_down</div>
+        </div> :
+        <div className="text-[15px] flex justify-center items-center gap-[5px] select-none cursor-pointer" onClick={()=>{panel_state[1](true);}}>
+          <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{sortedCharacters.length}</div>
+          <Tran text={`Charactors`} lang={lang[0]} />
+          <div className="g_i">keyboard_arrow_up</div>
+        </div>
+      }
+      {panel_state[0] ? 
+        <>
+          <button className="text-[14px] w-[100%] flex gap-[5px] items-center justify-center text-[#ccc]" onClick={cycleSortOption}>
+            <div><Tran text={'sort by ' + sortOption} lang={lang[0]} /></div>
+            <span className="g_i text-[20px]">sort</span>
+          </button>
+          <button className="text-[14px] w-[100%] flex gap-[5px] items-center justify-center text-[#ccc]" onClick={color_randomize}>
+            <div><Tran text={'Color randomize'} lang={lang[0]} /></div>
+            <span className="g_i text-[20px]">cached</span>
+          </button>
+          <div className="flex flex-col gap-[5px] p-[5px] rounded-[5px]">
+            {
+              sortedCharacters.map((char, index) => {
+                return (
+                  <a key={index} className="flex flex-col gap-[5px] bg-[#444] p-[2px] rounded-[5px]"
+                    href={`#${char.character}`}>
+                      <div className="flex gap-[5px] items-center">
+                        <div className="color_circle w-[15px] rounded-[15px] aspect-square cursor-pointer"
+                          style={{ backgroundColor: char.color }} onClick={(e) => e.currentTarget.children[0].click()}>
+                          <input type="color" value={char.color} style={{ display: 'none' }} onChange={(e) => char_update_color(char.character, e.target.value)} />
+                        </div>
+                        <div className={`text-[14px] font-[700] `} style={{ color: char.color }}>{char.character}</div>
+                        <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{char.message.length}</div>
+                      </div>
+                    <div className="grid grid-cols-3 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+                      {
+                        char_state[0].map((stat, index) => {
+                          return (
+                            <Stat_block key={index} name={stat.name} value={stat.value} max={stat.max} />
+                          )
+                        })
+                      }
+                      
+                    </div>
+                    <div className="grid grid-cols-8 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+                      {
+                        char_ability[0].map((stat, index) => {
+                          return (
+                            <Abliity_block key={index} name={stat.name} value={stat.value} />
+                          )
+                        })
+                      }
+                    </div>
+
+                  </a>
+                )
+              })
+            }
+          </div>
+        </>
+       : <></>}
+      
+    </div>
+  )
+}
+
+function Chat_log_viewer({log_json, log_charactors, lang}){
+  return(
+    <div className="chat_log_viewer overflow-y-scroll h-[100%] w-[100%] flex flex-col gap-[5px] p-[5px] bg-[#333] rounded-[5px]">
+      {
+        log_json.map((log, index) => {
+          let color;
+          log_charactors.map((char, index) => {
+            if (log.character === char.character) {
+              color = char.color;
+            }
+          })
+          return (
+            <div key={index} id={log.character} className={`flex flex-col gap-[2px]  justify-center 
+                text-left shadow-[0px_0px_3px_#555] rounded-[5px] p-[5px] hover:bg-[#444] duration-[0.25s]`}>
+              <div className="flex gap-[5px] items-center">
+                <div className=" text-[12px] bg-[#555] p-[5px] rounded-[5px]">{log.channel.split('[')[1]?.split(']')[0] ?? log.channel}</div>
+                <div className={`text-[15px] font-[900] `} style={{ color: color }}>{log.character}</div>
+                <div className={`text-[12px] font-[500] text-right flex-grow `} style={{ color: '#999' }}>{`#${index}`}</div>
+              </div>
+              <div className=" text-[15px]">{log.message}</div>
+            </div>
+          )
+        })
+      }
+    </div>
+  )
+}
+
 function Log_reader({ log_file_name}){
   const lang = useContext(LangContext);
 
@@ -72,9 +205,10 @@ function Log_reader({ log_file_name}){
   const logHtml_string = useState('')
   const log_json = useState([])
   const log_charactors = useState([/*{ character: 'character', color: 'log_color', message: [] }*/])
-  const log_keywords = useState([])
   const log_locations = useState([])
-  
+  const log_keywords = useState([])
+
+  const log_read_progress = useState(0)
   
   useEffect(() => {
     const logFile_raw = findItem((key) => log_file_name === key.split('.').shift().split('[').shift());
@@ -85,6 +219,7 @@ function Log_reader({ log_file_name}){
 
   useEffect(() => {
     //console.log('logFile', logFile[0]);
+    if(logFile[0].key === ''){return}
     const htmlString = dataUrlToString(logFile[0].value);
     //console.log('htmlString', htmlString);
     logHtml_string[1](htmlString)
@@ -104,10 +239,18 @@ function Log_reader({ log_file_name}){
       const channel = chat_logs[i].children[0]?.innerText??'';
       const character = chat_logs[i].children[1]?.innerText??'';
       const message = chat_logs[i].children[2]?.innerText??'';
+      
       let first_message = false;
+
       log_charactors[1]((v) => {
         // Find the index of the character in the array
         const index = v.findIndex((item) => item.character === character);
+
+        const foundLocation = locationDictionary.find(location => message.includes(location));
+        if (foundLocation) {
+          const updatedMessage = message.replace(foundLocation, `[[${foundLocation}]]`);
+          console.log('Updated message', updatedMessage);
+        }
 
         if (index !== -1) {
           // If the character exists, add the message to its message array
@@ -116,19 +259,43 @@ function Log_reader({ log_file_name}){
         } else {
           // If the character doesn't exist, add it to the array
           first_message = true;
-          return [...v, { character: character, color: log_color, message: [message] }];
+          return [...v, {
+            character: character, color: log_color, message: [message], 
+            stat: [
+              { name: 'HP', value: null, max: null, min: 0 },
+              { name: 'MP', value: null, max: null, min: 0 },
+              { name: 'SAN', value: null, max: null, min: 0 },
+            ],
+            ability: [
+              { name: 'STR', value: null },
+              { name: 'CON', value: null },
+              { name: 'POW', value: null },
+              { name: 'DEX', value: null },
+              { name: 'SAP', value: null },
+              { name: 'SIZ', value: null },
+              { name: 'INT', value: null },
+              { name: 'EDU', value: null },
+            ],
+            skills: [
+              { name: '目星', value: null },
+              
+              
+            ],
+            items: []
+          }];
         }
       });
       log_json[1]((v) => [...v, { color: log_color, channel: channel, character: character, message: message, first_message: first_message }])
     }
     
     //find locations
-    const locationDictionary = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']; // replace with your location dictionary
+    const locationDictionary = keywords.locations;
 
     log_json[0].map((log, index) => {
       const messageContainsLocation = locationDictionary.some(location => log.message.includes(location));
       if (messageContainsLocation) {
         // do something
+        console.log('log.message', log.message);
       }
     });
 
@@ -232,34 +399,15 @@ function Log_reader({ log_file_name}){
       <div className=" h-[100%] w-[100%] gap-[5px]
       grid grid-cols-1 grid-rows-[100px_auto] @[600px]:grid-cols-[250px_auto] @[600px]:grid-rows-1">
         <div className="chat_log_viewer overflow-y-scroll h-[100%] w-[100%] flex flex-col gap-[5px] p-[5px] bg-[#333] rounded-[5px]">
-          <div className="char_container">
-            <div className="text-[15px]"><Tran text={'Charactors'} lang={lang[0]} /></div>
-            <button className="text-[14px] w-[100%] flex gap-[5px] items-center justify-center text-[#ccc]" onClick={cycleSortOption}>
-              <div><Tran text={'sort by ' +sortOption} lang={lang[0]} /></div>
-              <span className="g_i text-[20px]">sort</span>
-            </button>
-            <button className="text-[14px] w-[100%] flex gap-[5px] items-center justify-center text-[#ccc]" onClick={color_randomize}>
-              <div><Tran text={'Color randomize'} lang={lang[0]} /></div>
-              <span className="g_i text-[20px]">cached</span>
-            </button>
-            <div className="flex flex-col gap-[5px] p-[5px] rounded-[5px]">
-              {
-                sortedCharacters.map((char, index) => {
-                  return (
-                    <a key={index} className="flex gap-[5px] bg-[#444] p-[2px] rounded-[5px] items-center" 
-                      href={`#${char.character}`}>
-                      <div className="color_circle w-[15px] rounded-[15px] aspect-square cursor-pointer" 
-                        style={{backgroundColor: char.color}} onClick={(e) => e.currentTarget.children[0].click()}>
-                        <input type="color" value={char.color} style={{display: 'none'}} onChange={(e) => char_update_color(char.character, e.target.value)} />
-                      </div>
-                      <div className={`text-[14px] font-[700] `} style={{ color: char.color }}>{char.character}</div>
-                      <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{char.message.length}</div>
-                    </a>
-                  )
-                })
-              }
-            </div>
-          </div>
+          
+          <Character_panel 
+          log_charactors={log_charactors[0]} 
+          char_update_color={char_update_color} 
+          color_randomize={color_randomize} 
+          cycleSortOption={cycleSortOption} 
+          sortOption={sortOption} 
+          sortedCharacters={sortedCharacters} 
+          lang={lang} />
 
           <div className="locations_container">
             <div className="text-[15px]"><Tran text={'Locations'} lang={lang[0]} /></div>
@@ -285,28 +433,7 @@ function Log_reader({ log_file_name}){
           
         </div>
         
-        <div className="chat_log_viewer overflow-y-scroll h-[100%] w-[100%] flex flex-col gap-[5px] p-[5px] bg-[#333] rounded-[5px]">
-          {
-            log_json[0].map((log, index) => {
-              let color;
-              log_charactors[0].map((char, index) => {
-                if (log.character === char.character) {
-                  color = char.color;
-                }
-              })
-              return (
-                <div key={index} id={log.character} className={`flex flex-col gap-[2px]  justify-center 
-                text-left shadow-[0px_0px_3px_#555] rounded-[5px] p-[5px] hover:bg-[#444] duration-[0.25s]`}>
-                  <div className="flex gap-[5px] items-center">
-                    <div className=" text-[12px] bg-[#555] p-[5px] rounded-[5px]">{log.channel.split('[')[1]?.split(']')[0] ?? log.channel}</div>
-                    <div className={`text-[15px] font-[900] `} style={{ color: color }}>{log.character}</div>
-                  </div>
-                  <div className=" text-[15px]">{log.message}</div>
-                </div>
-              )
-            })
-          }
-        </div>
+        <Chat_log_viewer log_json={log_json[0]} log_charactors={log_charactors[0]} lang={lang[0]} />
 
       </div>
       

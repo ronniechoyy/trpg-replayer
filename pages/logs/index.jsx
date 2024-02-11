@@ -112,7 +112,7 @@ function Uploader({ onUploaded }) {
         onChange={(e) => handleFiles(e.target.files)}
       />
       <div
-        className={`fixed max-w-[90%] w-[500px] h-[500px] bg-[#555] rounded-[5px] left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]
+        className={`fixed max-w-[90%] max-h-[90%] w-[500px] h-[500px] bg-[#555] rounded-[5px] left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]
         grid place-content-center`}
         
       >
@@ -136,13 +136,13 @@ function Uploader({ onUploaded }) {
 function Replay_block({ title = 'Title', description = "Description", progress ="0", url=''}){
   const lang = useContext(LangContext);
   return(
-    <div className="bg-[#555] hover:bg-[#5f5f5f] rounded-[5px] items-center text-left gap-[15px] px-[25px] grid @[800px]:grid-cols-[auto_200px]">
+    <div className="bg-[#555] hover:bg-[#5f5f5f] rounded-[5px] items-center text-left gap-[15px] px-[25px] py-[10px] grid @[800px]:grid-cols-[auto_200px]">
 
-      <div className="flex gap-[5px] items-center">
-        <div className="g_i text-[80px]">movie</div>
+      <div className="flex gap-[5px] items-center @container">
+        <div className="g_i text-[30px] @[400px]:text-[80px]">movie</div>
         <div>
-          <div className="text-[25px] font-[600]">{title}</div>
-          <div className="text-[15px]">{description}</div>
+          <div className="text-[15px] @[400px]:text-[25px] font-[600]">{title}</div>
+          <div className="text-[12px] @[400px]:text-[15px]">{description}</div>
         </div>
       </div>
 
@@ -188,45 +188,43 @@ export default function Logs() {
       </Head>
       <div className=" absolute inset-0 bg-[#333] text-[#eee]">
         <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px]">
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[20px] flex justify-between items-center gap-[5px]">
-            <div className="flex gap-[15px]">
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[15px] @[400px]:text-[20px] flex justify-between items-center gap-[5px] @container">
+
+            <div className="flex flex-col @[400px]:flex-row gap-[15px]">
               <Link className=" cursor-pointer select-none" href={'/'} >TRPG Replayer Beta v0.0.1</Link>
               <Link className=" cursor-pointer select-none flex items-center gap-[5px]" href={'https://github.com/ronniechoyy/trpg-replayer'} >
                 <div className="text-[15px]">by RONI</div>
                 <img className="w-[20px] object-contain invert" src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="RONI GIT" /></Link>
             </div>
             
-            <div className="flex gap-[15px]">
+            <div className=" flex flex-col-reverse @[400px]:flex-row gap-[15px]">
               <select className="text-[15px] text-right bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id="" 
               value={lang[0]} onChange={(v) => { lang[1](v.target.value) }}>
-                <option value="zh-TW">Chinese (Traditional)</option>
-                <option value="en">English</option>
-                <option value="ja">Japanese</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="it">Italian</option>
-                <option value="pt">Portuguese</option>
-                <option value="ru">Russian</option>
-                <option value="ar">Arabic</option>
-                <option value="hi">Hindi</option>
+                <option value="zh-TW"><Tran text={'Traditional Chinese'} lang={lang[0]} /></option>
+                <option value="en"><Tran text={'English'} lang={lang[0]} /></option>
+                <option value="ja"><Tran text={'Japanese'} lang={lang[0]} /></option>
+                <option value="es"><Tran text={'Spanish'} lang={lang[0]} /></option>
+                <option value="fr"><Tran text={'French'} lang={lang[0]} /></option>
+                <option value="de"><Tran text={'German'} lang={lang[0]} /></option>
+                <option value="it"><Tran text={'Italian'} lang={lang[0]} /></option>
+                <option value="pt"><Tran text={'Portuguese'} lang={lang[0]} /></option>
+                <option value="ru"><Tran text={'Russian'} lang={lang[0]} /></option>
+                <option value="ar"><Tran text={'Arabic'} lang={lang[0]} /></option>
+                <option value="hi"><Tran text={'Hindi'} lang={lang[0]} /></option>
               </select>
-              <div className=" text-[20px]"><Tran text={'My logs'} lang={lang[0]} /></div>
+              <div className="text-[18px] text-right"><Tran text={'My logs'} lang={lang[0]} /></div>
             </div>
             
           </div>
           <div className="bg-[#555] w-[100%] rounded-[5px] p-[10px] text-[25px] flex flex-col gap-[5px]">
 
             <div className="flex gap-[5px] text-[15px]">
-              <Butthole theme={'dark'} className={'p-[12px] flex gap-[5px]'} onClick={() => { uploader_state[1](true) }}>
+              <Butthole theme={'dark'} className={'p-[12px] flex justify-center gap-[5px] w-[100%]'} onClick={() => { uploader_state[1](true) }}>
                 <div className="g_i">upload</div>
                 
                 <Tran text={'Open logs'} lang={lang[0]} />
               </Butthole>
-              <Butthole theme={'dark'} className={'p-[12px] flex gap-[5px]'} onClick={() => { }}>
-                <div className="g_i">delete</div>
-                <Tran text={'Delete'} lang={lang[0]} />
-                </Butthole>
+              
             </div>
 
             <Replay_handler />
