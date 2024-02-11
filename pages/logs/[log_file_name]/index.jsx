@@ -67,21 +67,6 @@ function rgbToHex(rgb) {
 
 function Character_panel({log_charactors, char_update_color, color_randomize, cycleSortOption, sortOption, sortedCharacters, lang}){
   const panel_state = useState(true);
-  const char_state = useState([
-    { name: 'HP', value: null, max: null, min: 0 },
-    { name: 'MP', value: null, max: null, min: 0 },
-    { name: 'SAN', value: null, max: null, min: 0 },
-  ])
-  const char_ability = useState([
-    { name: 'STR', value: null },
-    { name: 'CON', value: null },
-    { name: 'POW', value: null },
-    { name: 'DEX', value: null },
-    { name: 'SAP', value: null },
-    { name: 'SIZ', value: null },
-    { name: 'INT', value: null },
-    { name: 'EDU', value: null },
-  ])
 
   function Stat_block({name, value, max}){
     return(
@@ -138,25 +123,28 @@ function Character_panel({log_charactors, char_update_color, color_randomize, cy
                         <div className={`text-[14px] font-[700] `} style={{ color: char.color }}>{char.character}</div>
                         <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{char.message.length}</div>
                       </div>
-                    <div className="grid grid-cols-3 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
-                      {
-                        char_state[0].map((stat, index) => {
-                          return (
-                            <Stat_block key={index} name={stat.name} value={stat.value} max={stat.max} />
-                          )
-                        })
-                      }
-                      
-                    </div>
-                    <div className="grid grid-cols-8 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
-                      {
-                        char_ability[0].map((stat, index) => {
-                          return (
-                            <Abliity_block key={index} name={stat.name} value={stat.value} />
-                          )
-                        })
-                      }
-                    </div>
+
+                    {log_charactors[index].stat[2].value === null ? <></> : <>
+                      <div className="grid grid-cols-3 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+                        {
+                          log_charactors[index].stat.map((stat, index) => {
+                            return (
+                              <Stat_block key={index} name={stat.name} value={stat.value} max={stat.max} />
+                            )
+                          })
+                        }
+
+                      </div>
+                      <div className="grid grid-cols-8 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+                        {
+                          log_charactors[index].ability.map((stat, index) => {
+                            return (
+                              <Abliity_block key={index} name={stat.name} value={stat.value} />
+                            )
+                          })
+                        }
+                      </div>
+                      </>}
 
                   </a>
                 )
@@ -303,7 +291,7 @@ function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtm
       onMouseUp={handleEnd}
       onTouchStart={handleStart}
       onTouchEnd={handleEnd}>
-      <div className="text-[15px] z-[1] select-none"><Tran text={'Timeline'} lang={lang} />{` ${Math.round(localTimeline * 100)} %`}</div>
+      <div className="text-[15px] z-[1] select-none"><Tran text={'Progress rate'} lang={lang} />{` ${Math.round(localTimeline * 100)} %`}</div>
       <div className="timeline_handler absolute bg-[#555] h-[90%] rounded-[5px] m-[2px]" style={{ width: `${localTimeline * max}%` }}></div>
     </div>
   )
@@ -367,7 +355,35 @@ function Log_reader({ log_file_name}){
           //console.log('Updated message', updatedMessage);
         }
 
+        
+
         if (index !== -1) {
+
+          //find ability
+          //[ 紫宮るな ( LUNA／露娜 ) ] HP : 10 → 7
+          const statChange = message.match(/\[\s(.*?)\s\]\s(HP|MP|SAN)\s:\s(\d+)\s→\s(\d+)/);
+          if (statChange != null) {
+            const character = statChange[1];
+            const statName = statChange[2];
+            const initialValue = parseInt(statChange[3], 10);
+            const finalValue = parseInt(statChange[4], 10);
+            const decreaseInValue = initialValue - finalValue;
+            const ii = v.findIndex((char) => char.character === character);
+            console.log('Character', character, statName, 'decrease', decreaseInValue);
+            console.log('log_charactors[0][i]', v[ii]);
+            const characterStats = v[ii].stat;
+            characterStats.forEach(stat => {
+              if (stat.name === statName) {
+                if (stat.max === null) {
+                  stat.max = initialValue;
+                  stat.value = initialValue;
+                }
+                //console.log('Character', character, stat.name, 'max set to', stat.max);
+                stat.log.push({ value: finalValue, time: i });
+              }
+            });
+          }
+
           // If the character exists, add the message to its message array
           const newChar = { ...v[index], message: [...v[index].message, message] };
           return [...v.slice(0, index), newChar, ...v.slice(index + 1)];
@@ -377,9 +393,9 @@ function Log_reader({ log_file_name}){
           return [...v, {
             character: character, color: log_color, message: [message], 
             stat: [
-              { name: 'HP', value: null, max: null, min: 0 },
-              { name: 'MP', value: null, max: null, min: 0 },
-              { name: 'SAN', value: null, max: null, min: 0 },
+              { name: 'HP', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
+              { name: 'MP', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
+              { name: 'SAN', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
             ],
             ability: [
               { name: 'STR', value: null },
@@ -400,18 +416,6 @@ function Log_reader({ log_file_name}){
 
       });
       log_json[1]((v) => [...v, { color: log_color, channel: channel, character: character, message: message, first_message: first_message }])
-
-      //find ability
-      //[ 紫宮るな ( LUNA／露娜 ) ] HP : 10 → 7
-      const HP = message.match(/\[\s(.*?)\s\]\sHP\s:\s(\d+)\s→\s(\d+)/);
-      if (HP !== null) {
-        const character = HP[1];
-        const initialHP = parseInt(HP[2], 10);
-        const finalHP = parseInt(HP[3], 10);
-        const decreaseInHP = initialHP - finalHP;
-        const i = log_charactors[0].findIndex((char) => char.character === character);
-        console.log('Character', character, 'HP decrease', decreaseInHP);
-      }
     }
 
     

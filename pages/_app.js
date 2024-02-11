@@ -5,7 +5,7 @@ export const LangContext = createContext('en');
 
 export default function App({ Component, pageProps }) {
 
-  const lang_state = useState('en');
+  const lang_state = useState('zh-TW');
   const loaded = useState(false);
 
   useEffect(() => {

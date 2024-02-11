@@ -153,7 +153,7 @@ function Replay_block({ title = 'Title', description = "Description", progress =
 
       <div className="flex gap-[15px] items-center justify-end">
         <div className=" ">
-          <div className="text-[15px]"><Tran text={'Progresstion'} lang={lang[0]} /></div>
+          <div className="text-[15px]"><Tran text={'Progress rate'} lang={lang[0]} /></div>
           <div className="text-[35px]">{progress} %</div>
         </div>
         <div className="flex flex-col gap-[5px]">
@@ -202,7 +202,8 @@ export default function Logs() {
                 <img className="w-[20px] object-contain invert" src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="RONI GIT" /></Link>
             </div>
             
-            <div className=" flex flex-col-reverse @[400px]:flex-row gap-[15px]">
+            <div className=" flex gap-[0px]">
+              <div className="text-[18px] g_i">language</div>
               <select className="text-[15px] text-right bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id="" 
               value={lang[0]} onChange={(v) => { lang[1](v.target.value) }}>
                 <option value="zh-TW"><Tran text={'Traditional Chinese'} lang={lang[0]} /></option>
@@ -217,17 +218,19 @@ export default function Logs() {
                 <option value="ar"><Tran text={'Arabic'} lang={lang[0]} /></option>
                 <option value="hi"><Tran text={'Hindi'} lang={lang[0]} /></option>
               </select>
-              <div className="text-[18px] text-right"><Tran text={'My logs'} lang={lang[0]} /></div>
+              {/*<div className="text-[18px] text-right"><Tran text={'My logs'} lang={lang[0]} /></div>*/}
             </div>
             
           </div>
           <div className="bg-[#555] w-[100%] rounded-[5px] p-[10px] text-[25px] flex flex-col gap-[5px]">
 
             <div className="flex gap-[5px] text-[15px]">
-              <Butthole theme={'dark'} className={'p-[12px] flex justify-center gap-[5px] w-[100%]'} onClick={() => { uploader_state[1](true) }}>
-                <div className="g_i">upload</div>
-                
-                <Tran text={'Open logs'} lang={lang[0]} />
+              <Butthole theme={'dark'} className={'p-[12px] flex flex-col justify-center gap-[5px] w-[100%]'} onClick={() => { uploader_state[1](true) }}>
+                <div className="flex justify-center gap-[5px]">
+                  <div className="g_i">upload</div>
+                  <Tran text={'Open logs'} lang={lang[0]} />
+                </div>
+                <div className="text-[12px] text-[#999]"><Tran text={'All data keep safe on your own device, no file will upload to any database.'} lang={lang[0]} /></div>
               </Butthole>
               
             </div>
