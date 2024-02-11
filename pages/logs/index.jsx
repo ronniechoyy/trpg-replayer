@@ -40,7 +40,8 @@ function Replay_handler() {
           if(file.split('[').length > 1){
             log_name = file.split('[').shift();
           }
-          return (<Replay_block key={index} title={log_name} description={file} progress={'0'} url={`/logs/${log_name}`} />)
+          const storedTimeline = localStorage.getItem(`${log_name}_replayReadingProgress`);
+          return (<Replay_block key={index} title={log_name} description={file} progress={Math.round(storedTimeline * 100)} url={`/logs/${log_name}`} />)
         }
       })}
     </div>
@@ -124,9 +125,13 @@ function Uploader({ onUploaded }) {
           onDragLeave={handleDragOut}
           onDrop={handleDrop}>
             
-            <div className=""><Tran text={'Click Here to upload'} lang={lang[0]} /></div>
-            <div> <Tran text={'or'} lang={lang[0]} /></div>
-            <div><Tran text={'Drag and Drop'} lang={lang[0]} /></div>
+          <div className=""><Tran text={'Click Here to upload'} lang={lang[0]} /></div>
+          <div> <Tran text={'or'} lang={lang[0]} /></div>
+          <div><Tran text={'Drag and Drop'} lang={lang[0]} /></div>
+          <div className="text-[18px] text-[#bbb] mt-[20px]">
+            ( <Tran text={'At the moment only support'} lang={lang[0]} /> CCFOLIA's logs )
+          </div>
+          
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 import Butthole from "@/components/Butthole";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { createRef, useState, useEffect, useContext } from "react";
+import { createRef, useState, useEffect, useContext, useRef } from "react";
 import keywords from "@/lib/keywords";
 import Tran from "@/lib/translater";
 import { LangContext } from "@/pages/_app";
@@ -170,9 +170,33 @@ function Character_panel({log_charactors, char_update_color, color_randomize, cy
   )
 }
 
-function Chat_log_viewer({log_json, log_charactors, lang}){
-  return(
-    <div className="chat_log_viewer overflow-y-scroll h-[100%] w-[100%] flex flex-col gap-[5px] p-[5px] bg-[#333] rounded-[5px]">
+function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lang }) {
+  const viewerRef = useRef();
+
+  let debounceTimeoutId;
+
+  const handleScroll = () => {
+    if (debounceTimeoutId) {
+      clearTimeout(debounceTimeoutId);
+    }
+
+    debounceTimeoutId = setTimeout(() => {
+      const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
+      const newScrollPos = (viewerRef.current.scrollTop / maxScrollTop);
+      if (newScrollPos !== scrollPos) {
+        setTimeline(newScrollPos);
+      }
+    }, 20); // 100ms debounce time
+  };
+
+  useEffect(() => {
+    const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
+    viewerRef.current.scrollTop = (scrollPos ) * maxScrollTop;
+  }, [scrollPos]);
+
+  return (
+    <div ref={viewerRef} onScroll={handleScroll}
+    className="chat_log_viewer overflow-y-scroll h-[100%] w-[100%] flex flex-col gap-[5px] p-[5px] bg-[#333] rounded-[5px]">
       {
         log_json.map((log, index) => {
           let color;
@@ -198,6 +222,93 @@ function Chat_log_viewer({log_json, log_charactors, lang}){
   )
 }
 
+function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtml_string }){
+  const [isDragging, setIsDragging] = useState(false);
+  const [localTimeline, setLocalTimeline] = useState(timeline);
+  const max = 99.25;
+  const timelineRef = useRef();
+  let debounceTimeoutId;
+
+  const handleStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleMove = (e) => {
+    if (!isDragging) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.touches ? e.touches[0].clientX : e.clientX - rect.left; // x position within the element
+    const width = rect.right - rect.left;
+    const newTimeline = Math.max(0, Math.min(1, x / width));
+    setLocalTimeline(newTimeline);
+
+    if (debounceTimeoutId) {
+      clearTimeout(debounceTimeoutId);
+    }
+
+    debounceTimeoutId = setTimeout(() => {
+      setTimeline(newTimeline);
+    }, 100); // 100ms debounce time
+  };
+
+  const handleEnd = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    const storedTimeline = localStorage.getItem(`${log_file_name}_replayReadingProgress`);
+    if (storedTimeline) {
+      console.log('storedTimeline', storedTimeline);
+      setLocalTimeline(parseFloat(storedTimeline));
+      setTimeout(() => {
+        setTimeline(parseFloat(storedTimeline));
+      }, 50);
+      
+    }
+  }, [logHtml_string[0]]);
+
+  useEffect(() => {
+    setLocalTimeline(timeline);
+    if (timeline == 0) { return }
+    localStorage.setItem(`${log_file_name}_replayReadingProgress`, timeline);
+  }, [timeline]);
+
+  useEffect(() => {
+    if (localStorage.getItem(`${log_file_name}_replayReadingProgress`) === null) { return }
+    if (timeline == 0) { return }
+    localStorage.setItem(`${log_file_name}_replayReadingProgress`, timeline);
+  },[])
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleEnd);
+      window.addEventListener('touchmove', handleMove);
+      window.addEventListener('touchend', handleEnd);
+    }
+
+    return () => {
+      if (isDragging) {
+        window.removeEventListener('mousemove', handleMove);
+        window.removeEventListener('mouseup', handleEnd);
+        window.removeEventListener('touchmove', handleMove);
+        window.removeEventListener('touchend', handleEnd);
+      }
+    };
+  }, [isDragging]);
+
+  return(
+    <div className="timeline_controler bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative"
+      ref={timelineRef}
+      onMouseDown={handleStart}
+      onMouseUp={handleEnd}
+      onTouchStart={handleStart}
+      onTouchEnd={handleEnd}>
+      <div className="text-[15px] z-[1] select-none"><Tran text={'Timeline'} lang={lang} />{` ${Math.round(localTimeline * 100)} %`}</div>
+      <div className="timeline_handler absolute bg-[#555] h-[90%] rounded-[5px] m-[2px]" style={{ width: `${localTimeline * max}%` }}></div>
+    </div>
+  )
+}
+
 function Log_reader({ log_file_name}){
   const lang = useContext(LangContext);
 
@@ -208,7 +319,9 @@ function Log_reader({ log_file_name}){
   const log_locations = useState([])
   const log_keywords = useState([])
 
+  const [timeline, setTimeline] = useState(0);
   const log_read_progress = useState(0)
+  
   
   useEffect(() => {
     const logFile_raw = findItem((key) => log_file_name === key.split('.').shift().split('[').shift());
@@ -221,14 +334,15 @@ function Log_reader({ log_file_name}){
     //console.log('logFile', logFile[0]);
     if(logFile[0].key === ''){return}
     const htmlString = dataUrlToString(logFile[0].value);
-    //console.log('htmlString', htmlString);
+    console.log('htmlString');
     logHtml_string[1](htmlString)
   }, [logFile[0]])
 
   useEffect(() => {
     const danger_html = document.querySelector('.danger_html')
     const chat_logs = danger_html.querySelectorAll('p');
-    console.log('danger_html', danger_html.length);
+
+    if (logHtml_string[0].length === 0) { return }
     //danger_html.style.display = 'none';
     for (let i = 0; i < chat_logs.length; i++) {
 
@@ -245,11 +359,12 @@ function Log_reader({ log_file_name}){
       log_charactors[1]((v) => {
         // Find the index of the character in the array
         const index = v.findIndex((item) => item.character === character);
-
+        //find locations
+        //Not yey done
         const foundLocation = locationDictionary.find(location => message.includes(location));
         if (foundLocation) {
           const updatedMessage = message.replace(foundLocation, `[[${foundLocation}]]`);
-          console.log('Updated message', updatedMessage);
+          //console.log('Updated message', updatedMessage);
         }
 
         if (index !== -1) {
@@ -278,15 +393,28 @@ function Log_reader({ log_file_name}){
             ],
             skills: [
               { name: '目星', value: null },
-              
-              
             ],
             items: []
           }];
         }
+
       });
       log_json[1]((v) => [...v, { color: log_color, channel: channel, character: character, message: message, first_message: first_message }])
+
+      //find ability
+      //[ 紫宮るな ( LUNA／露娜 ) ] HP : 10 → 7
+      const HP = message.match(/\[\s(.*?)\s\]\sHP\s:\s(\d+)\s→\s(\d+)/);
+      if (HP !== null) {
+        const character = HP[1];
+        const initialHP = parseInt(HP[2], 10);
+        const finalHP = parseInt(HP[3], 10);
+        const decreaseInHP = initialHP - finalHP;
+        const i = log_charactors[0].findIndex((char) => char.character === character);
+        console.log('Character', character, 'HP decrease', decreaseInHP);
+      }
     }
+
+    
     
     //find locations
     const locationDictionary = keywords.locations;
@@ -308,6 +436,11 @@ function Log_reader({ log_file_name}){
     console.log('log_json', log_json[0]);
     console.log('log_charactors', log_charactors[0]);
   }, [log_json[0]])
+
+  useEffect(() => {
+    console.log('timeline', timeline);
+    
+  }, [timeline])
 
   let debounceTimer;
 
@@ -433,7 +566,11 @@ function Log_reader({ log_file_name}){
           
         </div>
         
-        <Chat_log_viewer log_json={log_json[0]} log_charactors={log_charactors[0]} lang={lang[0]} />
+        <div className="flex flex-col gap-[5px] overflow-y-scroll">
+          <Timeline_controler timeline={timeline} setTimeline={setTimeline} lang={lang[0]} log_file_name={log_file_name} logHtml_string={logHtml_string[0]} />
+          <Chat_log_viewer log_json={log_json[0]} log_charactors={log_charactors[0]} scrollPos={timeline} setTimeline={setTimeline} lang={lang[0]} />
+        </div>
+        
 
       </div>
       
