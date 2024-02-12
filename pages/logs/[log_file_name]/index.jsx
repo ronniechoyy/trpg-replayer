@@ -65,25 +65,111 @@ function rgbToHex(rgb) {
   return "#" + r + g + b;
 }
 
+function Character_block({ char, index, char_update_color}) {
+  const expand = useState(true);//[0] is state, [1] is setState
+  return(
+    <div key={index} className="flex flex-col gap-[5px] bg-[#444] p-[2px] rounded-[5px]">
+      <div className="flex gap-[5px] items-center">
+        <div className="color_circle w-[15px] rounded-[15px] aspect-square cursor-pointer"
+          style={{ backgroundColor: char.color }} onClick={(e) => e.currentTarget.children[0].click()}>
+          <input type="color" value={char.color} style={{ display: 'none' }} onChange={(e) => char_update_color(char.character, e.target.value)} />
+        </div>
+        <div className={`text-[14px] font-[700] truncate`} style={{ color: char.color, maxWidth: '150px' }} title={char.character}>{char.character}</div>
+        <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{char.message.length}</div>
+        <div className=" flex-grow text-[12px] flex justify-end gap-[5px]">
+          <a href={`#${char.character}`} className="g_i"
+            title={'Jump to first appear time'}>timer</a>
+          {
+            char.stat[2].value === null ? <></> : 
+            <div className="g_i" title={'Show stat panel'} onClick={() => expand[1](!expand[0])}>
+                {expand[0] ? 'expand_less' : 'expand_more'}
+              </div>
+          }
+
+        </div>
+      </div>
+
+      {//If characotr have "SAN" stat than show the stat panel 
+        char.stat[2].value === null || expand[0]==false? <></> : <>
+          <div className="grid grid-cols-3 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+            {
+              char.stat.map((stat, index) => {
+                return (
+                  <Stat_block key={index} name={stat.name} value={stat.value} max={stat.max} />
+                )
+              })
+            }
+
+          </div>
+          <div className="grid grid-cols-8 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+            {
+              char.ability.map((stat, index) => {
+                return (
+                  <Abliity_block key={index} name={stat.name} value={stat.value} />
+                )
+              })
+            }
+          </div>
+          <div className="grid grid-cols-2 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
+            {
+              char.skills.map((stat, index) => {
+                return (
+                  <Abliity_block_t2 key={index} name={stat.name} value={stat.value} />
+                )
+              })
+            }
+
+          </div>
+        </>}
+
+    </div>
+  )
+}
+
+function Stat_block({ name, value, max }) {
+  return (
+    <div style={{
+      backgroundImage: `linear-gradient(90deg, #4f4f4f ${value / max * 100}%, #333 ${value / max * 100}%)`
+    }}>
+      <div className="flex flex-col" style={{ color: value?'#fff':'#999' }}>
+        <div>{name}</div>
+        <div>{`${value ?? '??'}${max ? '/' + max : ''}`}</div>
+      </div>
+    </div>
+  )
+}
+
+function Abliity_block_t2({ name, value, max = 100 }) {
+  return (
+    <div className=" grid grid-cols-[auto_20px] gap-[5px]  items-center" style={{
+      backgroundImage: `linear-gradient(90deg, #4f4f4f ${value / max * 100}%, #333 ${value / max * 100}%)`
+    }}>
+      <div>{name}</div>
+      {/*<div className="relative flex overflow-x-hidden gap-[5px]">
+          <div class="animate-marquee whitespace-nowrap">
+            <div>{name}</div>
+          </div>
+          <div class="absolute left-[5px] top-0 animate-marquee2 whitespace-nowrap">
+            <div>{name}</div>
+          </div>
+        </div>*/}
+
+      <div>{value ?? '??'}</div>
+    </div>
+  )
+}
+
+function Abliity_block({ name, value }) {
+  return (
+    <div className="flex flex-col" style={{ color: value ? '#fff' : '#999' }}>
+      <div>{name}</div>
+      <div>{value ?? '??'}</div>
+    </div>
+  )
+}
+
 function Character_panel({log_charactors, char_update_color, color_randomize, cycleSortOption, sortOption, sortedCharacters, lang}){
   const panel_state = useState(true);
-
-  function Stat_block({name, value, max}){
-    return(
-      <div style={{
-        backgroundImage: `linear-gradient(90deg, #666 ${value / max * 100}%, #333 ${value / max * 100}%)`
-      }}>{`${name} ${value??'??'}/${max??'??'}`}</div>
-    )
-  }
-  
-  function Abliity_block({name, value}){
-    return (
-      <div className="flex flex-col">
-        <div>{name}</div>
-        <div>{value??'??'}</div>
-      </div>
-    )
-  }
 
   return(
     <div className="char_container">
@@ -113,40 +199,7 @@ function Character_panel({log_charactors, char_update_color, color_randomize, cy
             {
               sortedCharacters.map((char, index) => {
                 return (
-                  <a key={index} className="flex flex-col gap-[5px] bg-[#444] p-[2px] rounded-[5px]"
-                    href={`#${char.character}`}>
-                      <div className="flex gap-[5px] items-center">
-                        <div className="color_circle w-[15px] rounded-[15px] aspect-square cursor-pointer"
-                          style={{ backgroundColor: char.color }} onClick={(e) => e.currentTarget.children[0].click()}>
-                          <input type="color" value={char.color} style={{ display: 'none' }} onChange={(e) => char_update_color(char.character, e.target.value)} />
-                        </div>
-                        <div className={`text-[14px] font-[700] `} style={{ color: char.color }}>{char.character}</div>
-                        <div className="text-[12px] bg-[#555] p-[5px] rounded-[5px] h-[14px] flex items-center">{char.message.length}</div>
-                      </div>
-
-                    {log_charactors[index].stat[2].value === null ? <></> : <>
-                      <div className="grid grid-cols-3 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
-                        {
-                          log_charactors[index].stat.map((stat, index) => {
-                            return (
-                              <Stat_block key={index} name={stat.name} value={stat.value} max={stat.max} />
-                            )
-                          })
-                        }
-
-                      </div>
-                      <div className="grid grid-cols-8 gap-[2px] [&>*]:bg-[#2e2e2e] text-[12px] [&>*]:rounded-[5px]">
-                        {
-                          log_charactors[index].ability.map((stat, index) => {
-                            return (
-                              <Abliity_block key={index} name={stat.name} value={stat.value} />
-                            )
-                          })
-                        }
-                      </div>
-                      </>}
-
-                  </a>
+                  <Character_block key={index} char={char} index={index} char_update_color={char_update_color} />
                 )
               })
             }
@@ -235,7 +288,7 @@ function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtm
 
     debounceTimeoutId = setTimeout(() => {
       setTimeline(newTimeline);
-    }, 100); // 100ms debounce time
+    }, 500); // 100ms debounce time 
   };
 
   const handleEnd = () => {
@@ -332,6 +385,9 @@ function Log_reader({ log_file_name}){
 
     if (logHtml_string[0].length === 0) { return }
     //danger_html.style.display = 'none';
+    //remove raw file after loaded
+    danger_html.remove()
+
     for (let i = 0; i < chat_logs.length; i++) {
 
       //if length more than 30 than stop
@@ -359,7 +415,7 @@ function Log_reader({ log_file_name}){
 
         if (index !== -1) {
 
-          //find ability
+          //find state
           //[ 紫宮るな ( LUNA／露娜 ) ] HP : 10 → 7
           const statChange = message.match(/\[\s(.*?)\s\]\s(HP|MP|SAN)\s:\s(\d+)\s→\s(\d+)/);
           if (statChange != null) {
@@ -369,8 +425,8 @@ function Log_reader({ log_file_name}){
             const finalValue = parseInt(statChange[4], 10);
             const decreaseInValue = initialValue - finalValue;
             const ii = v.findIndex((char) => char.character === character);
-            console.log('Character', character, statName, 'decrease', decreaseInValue);
-            console.log('log_charactors[0][i]', v[ii]);
+            //console.log('Character', character, statName, 'decrease', decreaseInValue);
+            //console.log('log_charactors[0][i]', v[ii]);
             const characterStats = v[ii].stat;
             characterStats.forEach(stat => {
               if (stat.name === statName) {
@@ -384,6 +440,103 @@ function Log_reader({ log_file_name}){
             });
           }
 
+          //find sub state
+          // CCB<=70 【アイデア】
+          // CCB<=65 【幸運】
+          // CCB<=45 【知識】
+          const subStatChange = message.match(/CCB<=(.*?)【(アイデア|幸運|知識)】/);
+          if (subStatChange != null) {
+            //console.log('subStatChange', subStatChange);
+            const subStatName = subStatChange[2];
+            const subStatValue = parseInt(subStatChange[1], 10);
+            const ii = v.findIndex((char) => char.character === character);
+            const characterStats = v[ii].stat;
+            characterStats.forEach(stat => {
+              if (stat.name === subStatName) {
+                if (stat.max === null) {
+                  stat.max = 100;
+                  stat.value = subStatValue;
+                }
+                //console.log('Character', character, stat.name, 'max set to', stat.max);
+                stat.log.push({ value: subStatValue, time: i });
+              }
+            });
+          }
+          
+          //find ability
+          // CCB<={STR}*5 【STR × 5】
+          // CCB<={CON}*5 【CON × 5】
+          // CCB<={POW}*5 【POW × 5】
+          // CCB<={DEX}*5 【DEX × 5】
+          // CCB<={APP}*5 【APP × 5】
+          // CCB<={SIZ}*5 【SIZ × 5】
+          // CCB<={INT}*5 【INT × 5】
+          // CCB<={EDU}*5 【EDU × 5】
+          // CCB<={STAT}*5
+          
+          const abilityCheck = message.match(/【(\w+)/);
+          if(abilityCheck != null){
+            //console.log('statCheck', abilityCheck.input);
+            const abilityName = abilityCheck[1];
+            const abilityValue = parseInt(message.split('<=')[1], 10);
+            const ii = v.findIndex((char) => char.character === character);
+            const characterAbilities = v[ii].ability;
+            characterAbilities.forEach(ability => {
+              if (ability.name === abilityName) {
+                ability.value = abilityValue;
+              }
+            })
+          }
+
+          //find skills
+          // CCB<=70 【目星】
+          // CCB<=70 【聞き耳】
+          // CCB<=70 【図書館】
+          // CCB<=16 【回避】
+          // CCB<=50 【こぶし（パンチ）】
+          // CCB<=65 【応急手当】
+          // CCB<=80 【言いくるめ】
+          // CCB<=80 【心理学】
+
+          //CCB check
+          const skillCheck = message.match(/CCB<=(.*?)【(.*?)】/);
+          if (skillCheck != null && skillCheck[2] != 'アイデア'&& skillCheck[2] != '幸運' && skillCheck[2] != '知識') {
+            //console.log('skillCheck', skillCheck);
+            const skillName = skillCheck[2];
+            if (/[a-zA-Z]/.test(skillName)) {
+              
+            }else{
+              const skillValue = parseInt(skillCheck[1], 10);
+              const ii = v.findIndex((char) => char.character === character);
+              const characterSkills = v[ii].skills;
+              const skillIndex = characterSkills.findIndex(skill => skill.name === skillName);
+              if (skillIndex === -1) {
+                characterSkills.push({ name: skillName, value: skillValue });
+              } else {
+                characterSkills.forEach(skill => {
+                  if (skill.name === skillName) {
+                    skill.value = skillValue;
+                  }
+                })
+              }
+            }
+            
+          }
+          
+          
+          /*if (statCheck != null) {
+            const character = statCheck[1];
+            const statName = statCheck[2];
+            const ii = v.findIndex((char) => char.character === character);
+            const characterAbilities = v[ii].ability;
+            characterAbilities.forEach(ability => {
+              if (ability.name === statName) {
+                ability.value = 1;
+              }
+            })
+          }*/
+          
+
           // If the character exists, add the message to its message array
           const newChar = { ...v[index], message: [...v[index].message, message] };
           return [...v.slice(0, index), newChar, ...v.slice(index + 1)];
@@ -396,6 +549,9 @@ function Log_reader({ log_file_name}){
               { name: 'HP', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
               { name: 'MP', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
               { name: 'SAN', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
+              { name: 'アイデア', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
+              { name: '幸運', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
+              { name: '知識', value: null, max: null, min: 0, log: [/*{ value: null, time: null }*/] },
             ],
             ability: [
               { name: 'STR', value: null },
@@ -408,7 +564,7 @@ function Log_reader({ log_file_name}){
               { name: 'EDU', value: null },
             ],
             skills: [
-              { name: '目星', value: null },
+              //{ name: '目星', value: null },
             ],
             items: []
           }];

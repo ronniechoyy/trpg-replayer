@@ -1,16 +1,14 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 import "@/styles/globals.css";
 import "/styles/app.css";
-export const LangContext = createContext('en');
+
+const base_lang = 'en';
+export const LangContext = createContext(base_lang);
 
 export default function App({ Component, pageProps }) {
 
-  const lang_state = useState('zh-TW');
-  const loaded = useState(false);
-
-  useEffect(() => {
-    loaded[1](true);
-  }, [])
+  const lang_state = useState(base_lang);
+  const got = useState(false)
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -18,18 +16,19 @@ export default function App({ Component, pageProps }) {
         navigator.serviceWorker.register('/service-worker.js');
       });
     }
+
+    console.log('running', localStorage.getItem('lang'))
     lang_state[1](localStorage.getItem('lang'));
+    got[1](true)
+    
   }, []);
 
   useEffect(() => {
-    if (lang_state[0] == 'en') {
-      if (loaded[0]) {
-        localStorage.setItem('lang', lang_state[0]);
-        return;
-      }
-      return;
-    }
+    if (!got[0]) { return }
+    console.log('running2', lang_state[0])
     localStorage.setItem('lang', lang_state[0]);
+    
+    
   }, [lang_state[0]]);
 
   return (
