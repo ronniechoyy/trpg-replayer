@@ -1,11 +1,33 @@
 import Butthole from "@/components/Butthole";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { createRef, useState, useEffect, useContext, useRef } from "react";
+import { createRef, useState, useEffect, useContext, useRef, createContext } from "react";
 import keywords from "@/lib/keywords";
 import Tran from "@/lib/translater";
 import { LangContext } from "@/pages/_app";
 import Head from "next/head";
+
+export const Log_file = createContext();
+
+async function log_upload(log_file_localString, log_file_name) {
+  const timestamp = Date.now();
+  const randomNumbers = Math.floor(Math.random() * 1e10); // generates a random number between 0 and 9999999999
+  const log_file_name_encode = encodeURIComponent(log_file_name);
+  const log_name = `${timestamp}_${randomNumbers}`;
+  const data = {
+    log_id: log_name,
+    fileName: log_file_name,
+    log_data: log_file_localString.value
+  }
+  const response = await fetch('/api/log_upload', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  const responseData = await response.json();
+  console.log(responseData);
+
+  localStorage.setItem(log_file_name+'_share_link', log_name);
+}
 
 function findItem(matchingCondition) {
   for (let i = 0; i < localStorage.length; i++) {
@@ -352,6 +374,7 @@ function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtm
 
 function Log_reader({ log_file_name}){
   const lang = useContext(LangContext);
+  const log_file_context = useContext(Log_file);
 
   const logFile = useState({key: '', value: '123'})
   const logHtml_string = useState('')
@@ -362,14 +385,37 @@ function Log_reader({ log_file_name}){
 
   const [timeline, setTimeline] = useState(0);
   const log_read_progress = useState(0)
+
+  const router = useRouter();
   
   
   useEffect(() => {
     const logFile_raw = findItem((key) => log_file_name === key.split('.').shift().split('[').shift());
-    if(logFile_raw.key === ''){return}
-    logFile[1](logFile_raw)
-    
-  }, [log_file_name])
+    console.log('logFile_raw', logFile_raw);
+    if (logFile_raw.key === '') {
+      if (log_file_name === undefined) { return }
+      fetch(`/api/log_upload?key=${log_file_name}`) // replace with your URL
+        .then(response => response.json())
+        .then(data => {
+          const log_json_file = fetch(data.url)
+            .then(response => response.json())
+            .then(log_data => {
+              // create the key-value pair
+              const newKey = log_data.fileName+'.json'
+              const newValue = log_data.log_data;
+              // write the key-value pair
+              localStorage.setItem(newKey, newValue);
+              router.push(`/logs/${newKey.split('.').shift().split('[').shift() }`);
+              //logFile[1]({ key: newKey, value: newValue });
+              //log_file_context[1]({ key: newKey, value: newValue });
+            })
+        })
+        .catch(error => console.error('Error:', error));
+    } else {
+      logFile[1](logFile_raw);
+      log_file_context[1](logFile_raw);
+    }
+  }, [log_file_name]);
 
   useEffect(() => {
     //console.log('logFile', logFile[0]);
@@ -382,7 +428,7 @@ function Log_reader({ log_file_name}){
   useEffect(() => {
     const danger_html = document.querySelector('.danger_html')
     const chat_logs = danger_html.querySelectorAll('p');
-
+    console.log('danger_html', danger_html);
     if (logHtml_string[0].length === 0) { return }
     //danger_html.style.display = 'none';
     //remove raw file after loaded
@@ -741,30 +787,91 @@ function Log_reader({ log_file_name}){
 
 export default function log_player() {
   const { log_file_name } = useRouter().query;
-  console.log('log_file_name', log_file_name);
   const router = useRouter();
+  const lang = useContext(LangContext);
+  const log_file_state = useState({key: '', value: ''});
+  const share_link = useState('');
+  useEffect(() => {
+    console.log('log_file_name', log_file_name);
+    console.log('log_file_state', log_file_state);
+  }, [log_file_name,log_file_state]);
+
+  useEffect(() => {
+    if(log_file_name === undefined){return}
+    const share_link_key = log_file_name + '_share_link';
+    console.log('localStorage.getItem(share_link_key)', localStorage.getItem(share_link_key));
+    share_link[1](localStorage.getItem(share_link_key));
+    //listen local storage change
+    window.addEventListener('local_storage_change', (e) => {
+      console.log('local_storage_change', e);
+      if (e.key === share_link_key) {
+        share_link[1](e.newValue);
+      }
+    })
+  }, [log_file_name])
+
+  useEffect(() => {
+    console.log('share_link', share_link[0]);
+  },[share_link[0]])
 
   return (
     <>
       <Head>
-        <title>{log_file_name} - TRPG Replayer </title>
+        <title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>
         <meta name="description" content="A simple tool to replay your TRPG sessions" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">
 
         <div className="flex flex-col text-center justify-center items-center p-[5px_5px_0px_5px] gap-[5px]">
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px] text-[20px] flex justify-between items-center gap-[5px]">
-            <Link className=" cursor-pointer select-none flex gap-[5px] items-center" href={'/logs'} >
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[20px] flex justify-between items-center gap-[5px]">
+            <Link className=" cursor-pointer select-none flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]" href={'/logs'} >
               <div className="g_i">keyboard_arrow_left</div>
               <div className=" text-[20px]">{log_file_name}</div>
             </Link>
+            <div className=" cursor-pointer select-none flex gap-[5px] items-center" >
+              <div className="flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]">
+                {log_file_state[0].key.includes('.json') ? 
+                <><div className=" text-[12px]"><Tran text={'ONLINE LOG'} lang={lang[0]}></Tran></div>
+                    <div className="g_i">cloud</div></>:
+                <><div className=" text-[12px]"><Tran text={'LOCAL LOG'} lang={lang[0]}></Tran></div>
+                <div className="g_i">cloud_off</div></>}
+              </div>
+              <Log_file.Provider value={log_file_state}>
+                {share_link[0] === null ?
+                  <div className="flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]"
+                    onClick={() => {
+                      log_upload(log_file_state[0], log_file_name);
+                    }}>
+                    <div className=" text-[12px]"><Tran text={'SHARE'} lang={lang[0]}></Tran></div>
+                    <div className="g_i">share</div>
+                  </div>:
+                  <div className="flex gap-[5px] px-[5px] rounded-[5px] items-center bg-[#333] hover:bg-[#333] duration-[0.25s]"
+                    onClick={() => {
+                      //copyToClipboard(share_link[0]);
+                      const host = window.location.origin;
+                      const link = `${host}/logs/${share_link[0]}`;
+                      navigator.clipboard.writeText(link).then(() => {
+                        console.log('Link copied to clipboard');
+                        alert('Link copied to clipboard');
+                      });
+                    }}>
+                    <div className=" text-[12px]"><Tran text={'COPY LINK'} lang={lang[0]}></Tran></div>
+                    <div className="g_i">content_copy</div>
+                    <div className="text-[12px]">{share_link[0]}</div>
+                  </div>
+                }
+                
+              </Log_file.Provider>
+            </div>
           </div>
         </div>
 
         <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px] flex-grow overflow-hidden">
           <div className=" @container bg-[#555] h-[100%] w-[100%] rounded-[5px] p-[5px] text-[25px] flex justify-between items-center gap-[5px] overflow-hidden">
-            <Log_reader log_file_name={log_file_name} />
+            <Log_file.Provider value={log_file_state}>
+              <Log_reader log_file_name={log_file_name} />
+            </Log_file.Provider>
           </div>
         </div>
 

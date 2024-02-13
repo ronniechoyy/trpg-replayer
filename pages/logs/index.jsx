@@ -34,16 +34,36 @@ function Replay_handler() {
 
   return (
     <div className="replay_container @container flex-grow bg-[#333]  rounded-[5px] flex flex-col gap-[10px] p-[10px]">
-      {files.map((file, index) => {
-        if(file.split('.').pop() == 'json' || file.split('.').pop() == 'html' || file.split('.').pop() == 'txt' ){
-          let log_name = file.split('.').shift();
-          if(file.split('[').length > 1){
-            log_name = file.split('[').shift();
-          }
-          const storedTimeline = localStorage.getItem(`${log_name}_replayReadingProgress`);
-          return (<Replay_block key={index} title={log_name} description={file} progress={Math.round(storedTimeline * 100)} url={`/logs/${log_name}`} />)
-        }
-      })}
+      {
+        files.filter(file => ['json', 'html', 'txt'].includes(file.split('.').pop())).length === 0 ? (
+          <div className="h-[100%] w-[100%] text-[#999]">
+            <div className="g_i text-[100px]">arrow_upward_alt</div>
+            <div className="text-[14px] flex flex-col mt-[-30px] mb-[50px]">
+              <div><Tran text={'No logs found,'} lang={lang[0]} /></div>
+              <div><Tran text={'click the button above to upload your logs.'} lang={lang[0]} /></div>
+            </div>
+          </div>
+        ) : (
+          files.map((file, index) => {
+            if (['json', 'html', 'txt'].includes(file.split('.').pop())) {
+              let log_name = file.split('.').shift();
+              if (file.split('[').length > 1) {
+                log_name = file.split('[').shift();
+              }
+              const storedTimeline = localStorage.getItem(`${log_name}_replayReadingProgress`);
+              return (
+                <Replay_block
+                  key={index}
+                  title={log_name}
+                  description={file}
+                  progress={Math.round(storedTimeline * 100)}
+                  url={`/logs/${log_name}`}
+                />
+              );
+            }
+          })
+        )
+      }
     </div>
   );
 }
