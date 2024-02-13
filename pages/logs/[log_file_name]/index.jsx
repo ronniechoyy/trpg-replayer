@@ -839,7 +839,7 @@ export default function log_player() {
             </Link>
             <div className=" cursor-pointer select-none flex gap-[5px] items-center" >
               <div className="flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]">
-                {log_file_state[0].key.includes('.json') ? 
+                {share_link[0] != null ? 
                 <><div className=" text-[12px]"><Tran text={'ONLINE LOG'} lang={lang[0]}></Tran></div>
                     <div className="g_i">cloud</div></>:
                 <><div className=" text-[12px]"><Tran text={'LOCAL LOG'} lang={lang[0]}></Tran></div>
