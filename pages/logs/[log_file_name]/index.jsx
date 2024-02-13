@@ -9,13 +9,13 @@ import Head from "next/head";
 
 export const Log_file = createContext();
 
-async function log_upload(log_file_localString, log_file_name) {
+const log_upload = async (log_file_localString, log_file_name) => {
   const timestamp = Date.now();
   const randomNumbers = Math.floor(Math.random() * 1e10); // generates a random number between 0 and 9999999999
   const log_file_name_encode = encodeURIComponent(log_file_name);
-  const log_name = `${timestamp}_${randomNumbers}`;
+  const log_id = `${timestamp}_${randomNumbers}`;
   const data = {
-    log_id: log_name,
+    log_id: log_id,
     fileName: log_file_name,
     log_data: log_file_localString.value
   }
@@ -26,7 +26,8 @@ async function log_upload(log_file_localString, log_file_name) {
   const responseData = await response.json();
   console.log(responseData);
 
-  localStorage.setItem(log_file_name+'_share_link', log_name);
+  localStorage.setItem(log_file_name + '_share_link', log_id);
+  return log_id
 }
 
 function findItem(matchingCondition) {
@@ -388,7 +389,7 @@ function Log_reader({ log_file_name}){
 
   const router = useRouter();
   
-  
+  //download log file if not exist
   useEffect(() => {
     const logFile_raw = findItem((key) => log_file_name === key.split('.').shift().split('[').shift());
     console.log('logFile_raw', logFile_raw);
@@ -401,10 +402,13 @@ function Log_reader({ log_file_name}){
             .then(response => response.json())
             .then(log_data => {
               // create the key-value pair
+              const newId = log_data.log_id
               const newKey = log_data.fileName+'.json'
               const newValue = log_data.log_data;
               // write the key-value pair
               localStorage.setItem(newKey, newValue);
+              const share_link_key = log_data.fileName + '_share_link';
+              localStorage.setItem(share_link_key, newId);
               router.push(`/logs/${newKey.split('.').shift().split('[').shift() }`);
               //logFile[1]({ key: newKey, value: newValue });
               //log_file_context[1]({ key: newKey, value: newValue });
@@ -791,6 +795,8 @@ export default function log_player() {
   const lang = useContext(LangContext);
   const log_file_state = useState({key: '', value: ''});
   const share_link = useState('');
+
+  const share_link_key = log_file_name + '_share_link';
   useEffect(() => {
     console.log('log_file_name', log_file_name);
     console.log('log_file_state', log_file_state);
@@ -798,21 +804,23 @@ export default function log_player() {
 
   useEffect(() => {
     if(log_file_name === undefined){return}
-    const share_link_key = log_file_name + '_share_link';
     console.log('localStorage.getItem(share_link_key)', localStorage.getItem(share_link_key));
     share_link[1](localStorage.getItem(share_link_key));
-    //listen local storage change
-    window.addEventListener('local_storage_change', (e) => {
-      console.log('local_storage_change', e);
-      if (e.key === share_link_key) {
-        share_link[1](e.newValue);
-      }
-    })
   }, [log_file_name])
 
   useEffect(() => {
     console.log('share_link', share_link[0]);
   },[share_link[0]])
+
+  useEffect(() => {
+    //listen local storage change
+    window.addEventListener('storage', (e) => {
+      console.log('storage change', e);
+      if (e.key === share_link_key) {
+        share_link[1](e.newValue);
+      }
+    });
+  },[])
 
   return (
     <>
@@ -840,8 +848,9 @@ export default function log_player() {
               <Log_file.Provider value={log_file_state}>
                 {share_link[0] === null ?
                   <div className="flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]"
-                    onClick={() => {
-                      log_upload(log_file_state[0], log_file_name);
+                    onClick={async () => {
+                      const log_id = await log_upload(log_file_state[0], log_file_name);
+                      share_link[1](log_id);
                     }}>
                     <div className=" text-[12px]"><Tran text={'SHARE'} lang={lang[0]}></Tran></div>
                     <div className="g_i">share</div>
@@ -861,7 +870,6 @@ export default function log_player() {
                     <div className="text-[12px]">{share_link[0]}</div>
                   </div>
                 }
-                
               </Log_file.Provider>
             </div>
           </div>
