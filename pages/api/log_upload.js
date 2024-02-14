@@ -92,8 +92,10 @@ export default async function handler(req, res) {
       const signedUrl = await getSignedUrl(S3, command, { expiresIn: 3600 }); // Get a signed URL for the object
 
       res.status(200).json({ stat: "Success", url: signedUrl });
+      break
 
     case 'POST':
+      console.log('body', body);
       const body_json = JSON.parse(body);
       //console.log('body', body);
       const response = await uploadFile(bucketName, prefix + body_json.log_id + fileType, body);
