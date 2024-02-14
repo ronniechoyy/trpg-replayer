@@ -826,14 +826,18 @@ export default function log_player({ log_file_name, premeta }) {
     <>
       
       <Head>
-        {/*<title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>*/}
-        {premeta.log_actual_name != '' ?
-          <title>{`${premeta.log_actual_name} - TRPG Replayer`}</title> :
+        {/*Generate card with dynamic text*/}
+        {premeta.log_actual_name != '' ? (
+          <>
+            <title>{`${premeta.log_actual_name} - TRPG Replayer`}</title>
+            <meta property="og:title" content={premeta.log_actual_name} />
+            <meta property="og:url" content={window.location.href} />
+            {/*<meta property="og:image" content="/path_to_your_image.jpg" />*/} {/* replace with the path to your image */}
+          </>
+        ) : (
           <title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>
-        }
+        )}
         <meta name="description" content="A simple tool to replay your TRPG sessions" />
-        {premeta.log_actual_name != '' ? <meta property="og:title" content={premeta.log_actual_name} /> : <></>}
-
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">

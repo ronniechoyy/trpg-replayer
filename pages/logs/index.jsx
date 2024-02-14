@@ -208,8 +208,6 @@ export default function Logs() {
     <>
       <Head>
         <title>Logs - TRPG Replayer</title>
-        <meta name="description" content="A simple tool to replay your TRPG sessions" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className=" absolute inset-0 bg-[#333] text-[#eee]">
         <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px]">

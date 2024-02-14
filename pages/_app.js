@@ -1,6 +1,7 @@
 import { createContext, useEffect, useRef, useState } from 'react';
 import "@/styles/globals.css";
 import "/styles/app.css";
+import Head from 'next/head';
 
 const base_lang = 'en';
 export const LangContext = createContext(base_lang);
@@ -33,6 +34,12 @@ export default function App({ Component, pageProps }) {
 
   return (
     <>
+    <Head>
+        <title>TRPG Replayer</title>
+        <meta name="description" content="A simple tool to replay your TRPG sessions" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="google-site-verification" content="BdxyJCq7aElHFBmxY2TgBw6CAxDtN2LeMLqP2F7qlLw" />
+    </Head>
       <LangContext.Provider value={lang_state}>
         <Component {...pageProps} />
       </LangContext.Provider>
