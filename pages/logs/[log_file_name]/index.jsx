@@ -832,10 +832,10 @@ export default function log_player() {
       <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">
 
         <div className="flex flex-col text-center justify-center items-center p-[5px_5px_0px_5px] gap-[5px]">
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[20px] flex justify-between items-center gap-[5px]">
+          <div className="bg-[#555] max-[600px]:flex-col overflow-hidden w-[100%] rounded-[5px] p-[5px_10px] text-[20px] flex justify-between items-center gap-[5px]">
             <Link className=" cursor-pointer select-none flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]" href={'/logs'} >
               <div className="g_i">keyboard_arrow_left</div>
-              <div className=" text-[20px]">{log_file_name}</div>
+              <div className=" text-[20px] truncate">{log_file_name}</div>
             </Link>
             <div className=" cursor-pointer select-none flex gap-[5px] items-center" >
               <div className="flex gap-[5px] px-[5px] rounded-[5px] items-center hover:bg-[#666] duration-[0.25s]">

@@ -251,6 +251,7 @@ export default function Logs() {
                   <Tran text={'Open logs'} lang={lang[0]} />
                 </div>
                 <div className="text-[12px] text-[#999]"><Tran text={'All data keep safe on your own device, no file will upload to any database.'} lang={lang[0]} /></div>
+                <div className="text-[12px] text-[#999]"><Tran text={'Unless upload your log by click the share button at log page right top corner and share it'} lang={lang[0]} /></div>
               </Butthole>
               
             </div>
