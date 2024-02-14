@@ -789,8 +789,8 @@ function Log_reader({ log_file_name}){
 }
 
 
-export default function log_player() {
-  const { log_file_name } = useRouter().query;
+export default function log_player({ log_file_name, premeta }) {
+  //const { log_file_name } = useRouter().query;
   const router = useRouter();
   const lang = useContext(LangContext);
   const log_file_state = useState({key: '', value: ''});
@@ -824,9 +824,16 @@ export default function log_player() {
 
   return (
     <>
+      
       <Head>
-        <title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>
+        {/*<title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>*/}
+        {premeta.log_actual_name != '' ?
+          <title>{`${premeta.log_actual_name} - TRPG Replayer`}</title> :
+          <title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>
+        }
         <meta name="description" content="A simple tool to replay your TRPG sessions" />
+        {premeta.log_actual_name != '' ? <meta property="og:title" content={premeta.log_actual_name} /> : <></>}
+
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">
@@ -886,4 +893,28 @@ export default function log_player() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const { log_file_name } = context.query;
+  const { req } = context;
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.headers['x-forwarded-host'] || req.headers['host'];
+  let new_file_name = '';
+  if (log_file_name[0].match(/\d/)) {
+    console.log('this is a share link', log_file_name);
+    const url = `${protocol}://${host}/api/log_upload?key=${log_file_name}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const log_response = await fetch(data.url);
+    const log_data = await log_response.json();
+    new_file_name = log_data.fileName
+    //new_id = log_data.log_id;
+    //new_key = log_data.fileName + '.json';
+    //new_value = log_data.log_data;    
+  }
+  console.log('log_file_name', new_file_name);
+  return {
+    props: { log_file_name: log_file_name, premeta: { log_actual_name: new_file_name } },
+  }
 }
