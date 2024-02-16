@@ -6,6 +6,10 @@ import keywords from "@/lib/keywords";
 import Tran from "@/lib/translater";
 import { LangContext } from "@/pages/_app";
 import Head from "next/head";
+import { VariableSizeList as List } from 'react-window';
+import { AutoSizer } from 'react-virtualized';
+
+
 
 export const Log_file = createContext();
 
@@ -234,6 +238,140 @@ function Character_panel({log_charactors, char_update_color, color_randomize, cy
   )
 }
 
+function Chat_log_viewer_react_win_no_use({ log_json, log_charactors, scrollPos, setTimeline, lang }) {
+  const viewerRef = useRef();
+  const sizesRef = useRef([]);
+  let debounceTimeoutId;
+
+  const getSize = index => {
+    // return dynamic size based on content
+    // this is a placeholder, replace with your own logic
+    //return 50 + index % 50+Math.random()*100;
+    return sizesRef.current[index] || 50;
+
+  };
+
+  const handleScroll = () => {
+    if (debounceTimeoutId) {
+      clearTimeout(debounceTimeoutId);
+    }
+
+    debounceTimeoutId = setTimeout(() => {
+      const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
+      const newScrollPos = (viewerRef.current.scrollTop / maxScrollTop);
+      if (newScrollPos !== scrollPos) {
+        setTimeline(newScrollPos);
+      }
+    }, 500); // 100ms debounce time
+  };
+
+  useEffect(() => {
+    const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
+    viewerRef.current.scrollTop = (scrollPos ) * maxScrollTop;
+  }, [scrollPos]);
+
+  const Row = ({ index, style }) => {
+    useEffect(() => {
+      const offScreenDiv = document.createElement('div');
+      offScreenDiv.style.position = 'absolute';
+      offScreenDiv.style.visibility = 'hidden';
+      offScreenDiv.style.height = 'auto';
+      offScreenDiv.style.width = 'auto';
+      offScreenDiv.innerHTML = log_json[index].message;
+
+      document.body.appendChild(offScreenDiv);
+
+      sizesRef.current[index] = offScreenDiv.offsetHeight;
+
+      document.body.removeChild(offScreenDiv);
+    }, [log_json[index].message]);
+
+    let color;
+    log_charactors.forEach((char) => {
+      if (log_json[index].character === char.character) {
+        color = char.color;
+      }
+    });
+
+    return (
+      <div key={index} id={log_json[index].character} style={{ ...style, height: sizesRef.current[index] }} className="flex flex-col gap-[2px]  justify-center 
+                text-left shadow-[0px_0px_3px_#555] rounded-[5px] p-[5px] hover:bg-[#444] duration-[0.25s]">
+        <div className="flex gap-[5px] items-center">
+          <div className=" text-[12px] bg-[#555] p-[5px] rounded-[5px]">{log_json[index].channel.split('[')[1]?.split(']')[0] ?? log_json[index].channel}</div>
+          <div className={`text-[15px] font-[900] `} style={{ color: color }}>{log_json[index].character}</div>
+          <div className={`text-[12px] font-[500] text-right flex-grow `} style={{ color: '#999' }}>{`#${index}`}</div>
+        </div>
+        <div className=" text-[15px]">{log_json[index].message}</div>
+      </div>
+    );
+  };
+
+  return (
+    <div ref={viewerRef} onScroll={handleScroll}
+      className="chat_log_viewer overflow-y-scroll h-[100%] w-[100%] flex flex-col gap-[5px] p-[5px] bg-[#333] rounded-[5px]">
+      <AutoSizer>
+        {({ height, width }) => (
+          <List
+            height={height}
+            itemCount={log_json.length}
+            itemSize={getSize}
+            width={width}
+          >
+            {Row}
+          </List>
+        )}
+      </AutoSizer>
+    </div>
+  );
+}
+
+function Chat_log_block({ log, index, color }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const blockRef = useRef();
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.0001
+      }
+    );
+
+    if (blockRef.current) {
+      observer.observe(blockRef.current);
+      //console.log('blockRef.current', blockRef.current)
+      //setHeight(blockRef.current.offsetHeight);
+    }
+
+    return () => {
+      if (blockRef.current) {
+        observer.unobserve(blockRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div ref={blockRef} key={index} id={log.character} className={`flex flex-col gap-[2px]  justify-center 
+                text-left shadow-[0px_0px_3px_#555] rounded-[5px] p-[5px] hover:bg-[#444] duration-[0.25s]`} style={{ minHeight: isVisible ? 'auto' : '62.5px' }}>
+      {isVisible && (
+        <>
+          <div className="flex gap-[5px] items-center">
+            <div className=" text-[12px] bg-[#555] p-[5px] rounded-[5px]">{log.channel.split('[')[1]?.split(']')[0] ?? log.channel}</div>
+            <div className={`text-[15px] font-[900] `} style={{ color: color }}>{log.character}</div>
+            <div className={`text-[12px] font-[500] text-right flex-grow `} style={{ color: '#999' }}>{`#${index}`}</div>
+          </div>
+          <div className=" text-[15px]">{log.message}</div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lang }) {
   const viewerRef = useRef();
 
@@ -269,17 +407,7 @@ function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lan
               color = char.color;
             }
           })
-          return (
-            <div key={index} id={log.character} className={`flex flex-col gap-[2px]  justify-center 
-                text-left shadow-[0px_0px_3px_#555] rounded-[5px] p-[5px] hover:bg-[#444] duration-[0.25s]`}>
-              <div className="flex gap-[5px] items-center">
-                <div className=" text-[12px] bg-[#555] p-[5px] rounded-[5px]">{log.channel.split('[')[1]?.split(']')[0] ?? log.channel}</div>
-                <div className={`text-[15px] font-[900] `} style={{ color: color }}>{log.character}</div>
-                <div className={`text-[12px] font-[500] text-right flex-grow `} style={{ color: '#999' }}>{`#${index}`}</div>
-              </div>
-              <div className=" text-[15px]">{log.message}</div>
-            </div>
-          )
+          return (<Chat_log_block key={index} log={log} index={index} color={color} />)
         })
       }
     </div>
@@ -432,7 +560,7 @@ function Log_reader({ log_file_name}){
   useEffect(() => {
     const danger_html = document.querySelector('.danger_html')
     const chat_logs = danger_html.querySelectorAll('p');
-    console.log('danger_html', danger_html);
+    //console.log('danger_html', danger_html);
     if (logHtml_string[0].length === 0) { return }
     //danger_html.style.display = 'none';
     //remove raw file after loaded
@@ -787,6 +915,7 @@ function Log_reader({ log_file_name}){
     </>
   )
 }
+
 
 
 export default function log_player({ log_file_name, premeta }) {
