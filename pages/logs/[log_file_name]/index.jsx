@@ -250,7 +250,7 @@ function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lan
       if (newScrollPos !== scrollPos) {
         setTimeline(newScrollPos);
       }
-    }, 20); // 100ms debounce time
+    }, 500); // 100ms debounce time
   };
 
   useEffect(() => {
