@@ -831,7 +831,7 @@ export default function log_player({ log_file_name, premeta }) {
           <>
             <title>{`${premeta.log_actual_name} - TRPG Replayer`}</title>
             <meta property="og:title" content={premeta.log_actual_name} />
-            <meta property="og:url" content={window.location.href} />
+            
             {/*<meta property="og:image" content="/path_to_your_image.jpg" />*/} {/* replace with the path to your image */}
           </>
         ) : (
