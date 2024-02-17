@@ -326,6 +326,7 @@ function Chat_log_viewer_react_win_no_use({ log_json, log_charactors, scrollPos,
 }
 
 function Chat_log_block({ log, index, color }) {
+  const lang = useContext(LangContext);
   const [isVisible, setIsVisible] = useState(false);
   const blockRef = useRef();
   const [height, setHeight] = useState(0);
@@ -363,7 +364,18 @@ function Chat_log_block({ log, index, color }) {
           <div className="flex gap-[5px] items-center">
             <div className=" text-[12px] bg-[#555] p-[5px] rounded-[5px]">{log.channel.split('[')[1]?.split(']')[0] ?? log.channel}</div>
             <div className={`text-[15px] font-[900] `} style={{ color: color }}>{log.character}</div>
-            <div className={`text-[12px] font-[500] text-right flex-grow `} style={{ color: '#999' }}>{`#${index}`}</div>
+            <div className={`text-[12px] font-[500] text-right flex-grow `} style={{ color: '#999' }}>
+
+              <span className="inline-flex items-center gap-[15px] ">
+                <span className=" inline-flex items-center hover:bg-[#555] px-[15px] rounded-[5px] select-none cursor-pointer">
+                  <span className="g_i text-[20px]">play_arrow</span>
+                  <span className="text-[12px]"><Tran text={'Play from here'} lang={lang[0]} /></span>
+                </span>
+                <span className={`text-[12px] font-[500] text-right`} style={{ color: '#999' }}>{`#${index}`}</span>
+              </span>
+              
+            </div>
+            
           </div>
           <div className=" text-[15px]">{log.message}</div>
         </>
@@ -905,7 +917,21 @@ function Log_reader({ log_file_name}){
         </div>
         
         <div className="flex flex-col gap-[5px] overflow-y-scroll">
-          <Timeline_controler timeline={timeline} setTimeline={setTimeline} lang={lang[0]} log_file_name={log_file_name} logHtml_string={logHtml_string[0]} />
+          <div className="grid grid-cols-[auto_124px] gap-[2px]">
+            <Timeline_controler timeline={timeline} setTimeline={setTimeline} lang={lang[0]} log_file_name={log_file_name} logHtml_string={logHtml_string[0]} />
+            <div className="flex gap-[2px]">
+              <div className="bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
+                <div className="g_i">play_arrow</div>
+              </div>
+              <div className="bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
+                <div className="g_i">edit</div>
+              </div>
+              <div className="bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
+                <div className="g_i">ios_share</div>
+              </div>
+            </div>
+          </div>
+          
           <Chat_log_viewer log_json={log_json[0]} log_charactors={log_charactors[0]} scrollPos={timeline} setTimeline={setTimeline} lang={lang[0]} />
         </div>
         
