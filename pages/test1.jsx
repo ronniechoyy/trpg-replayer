@@ -27,7 +27,7 @@ export default function Test1() {
       <Head>
         <title>Logs - TRPG Replayer</title>
         <meta name="description" content="A simple tool to replay your TRPG sessions" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/trpg_viewer.png" />
       </Head>
       <div className=" absolute inset-0 bg-[#333] text-[#eee] gap-[5px] flex flex-col p-[5px]">
         <Butthole theme={'light'} className={`p-[10px] text-[#333] text-[20px]`} onClick={async()=>{

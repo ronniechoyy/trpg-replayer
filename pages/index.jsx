@@ -14,7 +14,9 @@ export default function Home() {
       
     </Head>
       <div className=" absolute inset-0 flex text-center justify-center items-center bg-[#333] text-[#eee]">
-        <div>
+        <img src="/trpg_viewer.png" alt="logo" className="h-[100%] mx-auto object-cover absolute z-[0] blur-[40px] brightness-[0.6] contrast-[0.9]" />
+        <div className="z-[1]">
+          <img src="/trpg_viewer.png" alt="logo" className="w-[300px] h-[300px] mx-auto object-contain" />
           <div className=" font-[600] text-[30px]">
             <Tran text={'Welcome to'} lang={lang[0]} /> TRPG Replayer
           </div>

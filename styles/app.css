@@ -15,7 +15,7 @@ body {
 .g_i {
     font-family: 'Material Symbols Rounded';
     user-select: none;
-    cursor: pointer;
+    /*cursor: pointer;*/
 }
 
 ::-webkit-scrollbar {

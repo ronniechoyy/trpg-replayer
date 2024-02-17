@@ -8,6 +8,8 @@ import { LangContext } from "@/pages/_app";
 import Head from "next/head";
 import { VariableSizeList as List } from 'react-window';
 import { AutoSizer } from 'react-virtualized';
+import T_tooltip from "@/components/T_tooltip";
+import RPG_player from "@/components/RPG_player";
 
 
 
@@ -338,8 +340,8 @@ function Chat_log_block({ log, index, color }) {
       },
       {
         root: null,
-        rootMargin: '0px',
-        threshold: 0.0001
+        rootMargin: '10px',
+        threshold: 0
       }
     );
 
@@ -384,10 +386,12 @@ function Chat_log_block({ log, index, color }) {
   );
 }
 
-function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lang }) {
+function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, currentIndex, setCurrentIndex, scrollUpdater, setScrollUpdater, lang }) {
   const viewerRef = useRef();
 
   let debounceTimeoutId;
+  //let currentIndex = 0; // Initialize current index
+  const objectsArrayLength = log_json.length; // Replace objectsArray with your array of objects
 
   const handleScroll = () => {
     if (debounceTimeoutId) {
@@ -397,15 +401,24 @@ function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lan
     debounceTimeoutId = setTimeout(() => {
       const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
       const newScrollPos = (viewerRef.current.scrollTop / maxScrollTop);
-      if (newScrollPos !== scrollPos) {
-        setTimeline(newScrollPos);
+      
+      // Calculate the current index based on the new scroll position
+      const newIndex = Math.round(newScrollPos * objectsArrayLength);
+      //console.log('newIndex', log_json[newIndex]);
+
+      if (newIndex !== currentIndex) {
+        setCurrentIndex(newIndex);
+        setTimeline(newIndex / objectsArrayLength);
+        setScrollUpdater('Chat_log_viewer');
       }
-    }, 500); // 100ms debounce time
+    }, 100); // 100ms debounce time
   };
 
   useEffect(() => {
-    const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
-    viewerRef.current.scrollTop = (scrollPos ) * maxScrollTop;
+    if (scrollUpdater !== 'Chat_log_viewer') {
+      const maxScrollTop = viewerRef.current.scrollHeight - viewerRef.current.clientHeight;
+      viewerRef.current.scrollTop = (scrollPos) * maxScrollTop;
+    }
   }, [scrollPos]);
 
   return (
@@ -426,7 +439,7 @@ function Chat_log_viewer({ log_json, log_charactors, scrollPos, setTimeline, lan
   )
 }
 
-function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtml_string }){
+function Timeline_controler({ lang, timeline, setTimeline, scrollUpdater, setScrollUpdater, currentIndex, setCurrentIndex, log_file_name, logHtml_string, log_json }){
   const [isDragging, setIsDragging] = useState(false);
   const [localTimeline, setLocalTimeline] = useState(timeline);
   const max = 99.25;
@@ -436,6 +449,9 @@ function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtm
   const handleStart = () => {
     setIsDragging(true);
   };
+
+  //let currentIndex = 0; // Initialize current index
+  const objectsArrayLength = log_json.length; // Replace objectsArray with your array of objects
 
   const handleMove = (e) => {
     if (!isDragging) return;
@@ -450,8 +466,15 @@ function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtm
     }
 
     debounceTimeoutId = setTimeout(() => {
-      setTimeline(newTimeline);
-    }, 500); // 100ms debounce time 
+      // Calculate the current index based on the new timeline
+      const newIndex = Math.round(newTimeline * objectsArrayLength);
+
+      if (newIndex !== currentIndex) {
+        setCurrentIndex(newIndex);
+        setTimeline(newIndex / objectsArrayLength);
+        setScrollUpdater('Timeline_controler');
+      }
+    }, 100); // 100ms debounce time 
   };
 
   const handleEnd = () => {
@@ -507,7 +530,10 @@ function Timeline_controler({ lang, timeline, setTimeline, log_file_name, logHtm
       onMouseUp={handleEnd}
       onTouchStart={handleStart}
       onTouchEnd={handleEnd}>
-      <div className="text-[15px] z-[1] select-none"><Tran text={'Progress rate'} lang={lang} />{` ${Math.round(localTimeline * 100)} %`}</div>
+      <div className="text-[13px] z-[1] select-none flex gap-[5px] justify-center">
+        <div><Tran text={'Progress rate'} lang={lang} />{` ${Math.round(localTimeline * 100)} %`}</div>
+        <div>{log_json.length ? `#${Math.round(localTimeline * log_json.length)}` : ''}</div>
+      </div>
       <div className="timeline_handler absolute bg-[#555] h-[90%] rounded-[5px] m-[2px]" style={{ width: `${localTimeline * max}%` }}></div>
     </div>
   )
@@ -525,7 +551,9 @@ function Log_reader({ log_file_name}){
   const log_keywords = useState([])
 
   const [timeline, setTimeline] = useState(0);
-  const log_read_progress = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [scrollUpdater, setScrollUpdater] = useState(null);
+  const rpg_player_open_state = useState(false);
 
   const router = useRouter();
   
@@ -918,25 +946,59 @@ function Log_reader({ log_file_name}){
         
         <div className="flex flex-col gap-[5px] overflow-y-scroll">
           <div className="grid grid-cols-[auto_124px] gap-[2px]">
-            <Timeline_controler timeline={timeline} setTimeline={setTimeline} lang={lang[0]} log_file_name={log_file_name} logHtml_string={logHtml_string[0]} />
+            <Timeline_controler timeline={timeline} setTimeline={setTimeline} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollUpdater={scrollUpdater} setScrollUpdater={setScrollUpdater} lang={lang[0]} log_file_name={log_file_name} logHtml_string={logHtml_string[0]} log_json={log_json[0]} />
             <div className="flex gap-[2px]">
-              <div className="bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
-                <div className="g_i">play_arrow</div>
-              </div>
-              <div className="bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
-                <div className="g_i">edit</div>
-              </div>
-              <div className="bg-[#333] rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
-                <div className="g_i">ios_share</div>
-              </div>
+              <T_tooltip title={
+                <div className="flex items-center gap-[5px]">
+                  <div className="text-[25px] g_i">play_arrow</div>
+                  <div className="text-[13px]"><Tran text={'Play from current place'} lang={lang[0]} /></div>
+                </div>
+              }>
+                <div className="bg-[#333] hover:bg-[#555] shadow-[inset_0px_0px_0px_2px_#333]
+                 rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square" 
+                  onClick={() => { rpg_player_open_state[1](true) }}>
+                  <div className="g_i">play_arrow</div>
+                </div>
+              </T_tooltip>
+              <T_tooltip title={
+                <div className="flex items-center gap-[5px]">
+                  <div className="text-[25px] g_i">edit</div>
+                  <div className="text-[13px]"><Tran text={'Edit logs ( hide log, add visual event, add sound event )'} lang={lang[0]} /></div>
+                </div>
+              }>
+                <div className="bg-[#333] hover:bg-[#555] shadow-[inset_0px_0px_0px_2px_#333]
+                rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
+                  <div className="g_i">edit</div>
+                </div>
+              </T_tooltip>
+              <T_tooltip title={
+                <div className="flex items-center gap-[5px]">
+                  <div className="text-[25px] g_i">ios_share</div>
+                  <div className="text-[13px]"><Tran text={'Export logs'} lang={lang[0]} /></div>
+                </div>
+              }>
+                <div className="bg-[#333] hover:bg-[#555] shadow-[inset_0px_0px_0px_2px_#333]
+                rounded-[5px] h-[40px] flex flex-col justify-center relative aspect-square">
+                  <div className="g_i">ios_share</div>
+                </div>
+              </T_tooltip>
+              
+              
             </div>
           </div>
           
-          <Chat_log_viewer log_json={log_json[0]} log_charactors={log_charactors[0]} scrollPos={timeline} setTimeline={setTimeline} lang={lang[0]} />
+          <Chat_log_viewer log_json={log_json[0]} log_charactors={log_charactors[0]} scrollPos={timeline} setTimeline={setTimeline} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollUpdater={scrollUpdater} setScrollUpdater={setScrollUpdater} lang={lang[0]} />
         </div>
         
 
       </div>
+      {rpg_player_open_state[0]==true && 
+        <div className=" fixed inset-0 bg-[#00000079] backdrop-blur-[2px] text-[#eee] gap-[5px] flex flex-col p-[5px] text-left z-[2]">
+          <RPG_player current_index={currentIndex} log_json={log_json[0]} />
+          <div className="Close_button absolute top-[5px] right-[5px] p-[5px] 
+          w-[40px] h-[40px] flex justify-center items-center rounded-[5px] cursor-pointer g_i" 
+          onClick={() => { rpg_player_open_state[1](false) }}>close</div>
+        </div>}
       
     </>
   )
@@ -993,7 +1055,7 @@ export default function log_player({ log_file_name, premeta }) {
           <title>{`${log_file_name ?? ''} - TRPG Replayer`}</title>
         )}
         <meta name="description" content="A simple tool to replay your TRPG sessions" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/trpg_viewer.png" />
       </Head>
       <div className="bg-[#333] text-[#eee] flex flex-col h-[100vh] w-[100%]">
 

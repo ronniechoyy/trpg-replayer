@@ -214,7 +214,9 @@ export default function Logs() {
           <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[15px] @[400px]:text-[20px] flex justify-between items-center gap-[5px] @container">
 
             <div className="flex flex-col @[400px]:flex-row gap-[15px]">
-              <Link className=" cursor-pointer select-none" href={'/'} >TRPG Replayer Beta v0.0.1</Link>
+              <Link className=" cursor-pointer select-none flex gap-[5px]" title="Last update in 2024/02/17" href={'/'} >
+                <img src="/trpg_viewer.png" alt="logo" className="h-[20px] object-contain" />
+                TRPG Replayer Beta v0.0.3</Link>
               <Link className=" cursor-pointer select-none flex items-center gap-[5px]" href={'https://github.com/ronniechoyy/trpg-replayer'} >
                 <div className="text-[15px]">by RONI</div>
                 <img className="w-[20px] object-contain invert" src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="RONI GIT" /></Link>
