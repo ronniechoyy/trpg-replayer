@@ -994,7 +994,7 @@ function Log_reader({ log_file_name}){
       </div>
       {rpg_player_open_state[0]==true && 
         <div className=" fixed inset-0 bg-[#00000079] backdrop-blur-[2px] text-[#eee] gap-[5px] flex flex-col p-[5px] text-left z-[2]">
-          <RPG_player current_index={currentIndex} log_json={log_json[0]} onClose={()=>{
+          <RPG_player current_index={currentIndex} log_json={log_json[0]} log_charactors={log_charactors[0]} onClose={()=>{
             rpg_player_open_state[1](false)
           }} />
         </div>}

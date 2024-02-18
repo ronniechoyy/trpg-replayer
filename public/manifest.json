@@ -1,0 +1,46 @@
+{
+    "short_name": "TRPG Replayer",
+    "name": "TRPG Replayer",
+    "description": "A simple tool to replay your TRPG sessions, here you can open your logs from your favorite TRPG platfrom ( only CCFOLIA supported for now ) and replay them as if you were enjoying the session again. \n Developed by: RONI github@ronniechoyy",
+    "screenshots": [
+        {
+            "src": "ss/ss_1.jpg",
+            "sizes": "1009x1009",
+            "type": "image/jpg",
+            "form_factor": "wide",
+            "label": "Front page of the TRPG Replayer app"
+        },
+        {
+            "src": "ss/ss_2.jpg",
+            "sizes": "1009x1009",
+            "type": "image/jpg",
+            "form_factor": "wide",
+            "label": "Logs list of the TRPG Replayer app"
+        },
+        {
+            "src": "ss/ss_3.jpg",
+            "sizes": "1009x1009",
+            "type": "image/jpg",
+            "form_factor": "wide",
+            "label": "Log viewer to replay a TRPG session"
+        },
+        {
+            "src": "ss/ss_4.jpg",
+            "sizes": "1009x1009",
+            "type": "image/jpg",
+            "form_factor": "wide",
+            "label": "RPG like text log viewer to replay a TRPG session"
+        }
+    ],
+    "icons": [
+        {
+            "src": "/trpg_viewer_512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/",
+    "display": "fullscreen",
+    "theme_color": "#eee",
+    "background_color": "#333"
+}

@@ -1,8 +1,11 @@
+import { LangContext } from "@/pages/_app";
+import Tran from "@/lib/translater";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const Text_appear_state_context = createContext(0)
 const Text_auto_play_context = createContext(1)
 const Log_json_context = createContext([])
+const Log_charactors_context = createContext([])
 const Text_index = createContext(0)
 const Text_appear_speed = createContext(50)
 
@@ -23,25 +26,27 @@ function Img_box({img_src}) {
   )
 }
 
-function Text_box({ /*text_appear_state,*/ texts, channel, character, color, onClick, onKeyDown }) {
+function Text_box({texts, channel, character, color, onKeyDown }) {
   const text_state = useState('');
   const text_appear_state = useContext(Text_appear_state_context)
   const text_auto_play = useContext(Text_auto_play_context)
   const log_json = useContext(Log_json_context)
   const text_index = useContext(Text_index)
   const skip_text = useState(false)
-  let text_appear_speed = useContext(Text_appear_speed)
+  const text_appear_speed = useContext(Text_appear_speed)
 
   const skip_text_ref = useRef(skip_text[0]); // Create a ref for skip_text
  
   useEffect(() => {
-    console.log('skip_text', skip_text[0])
+    //console.log('skip_text', skip_text[0])
     skip_text_ref.current = skip_text[0]; // Update the ref whenever skip_text changes
   }, [skip_text]);
 
   useEffect(() => {
     if (texts == undefined) { return }
-
+    if (text_auto_play[0] && text_appear_state[0] == 1){
+      text_flowout()
+    return}
     console.log('Text_box mounted\n', (texts ?? '').replace(/\s/g, ''))
 
     async function text_flowout() {
@@ -51,7 +56,7 @@ function Text_box({ /*text_appear_state,*/ texts, channel, character, color, onC
           skip_text[1](false)
           break
         }
-        await delay({ time: text_appear_speed })
+        await delay({ time: text_appear_speed[0] })
         //text_appear_speed = 250;
         text_state[1](texts.slice(0, i + 1))
       }
@@ -59,7 +64,7 @@ function Text_box({ /*text_appear_state,*/ texts, channel, character, color, onC
 
     text_flowout()
 
-  }, [texts, skip_text_ref]); 
+  }, [texts, skip_text_ref, text_auto_play[0]]); 
 
   useEffect(() => {
     if (texts == undefined) { return }
@@ -82,6 +87,18 @@ function Text_box({ /*text_appear_state,*/ texts, channel, character, color, onC
     }
     text_appear({ log_json, text_index, text_appear_state, text_auto_play })
   }
+  
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      console.log('Text_box\n handleKeyDown')
+      if (event.code === 'Space' || event.code === 'Enter') {
+        onclick_handler()
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
+  }, [text_auto_play[0], text_appear_state[0], onclick_handler])
+
 
   return(
     <div className="Text_box absolute bottom-[70px] left-[50%] flex flex-col gap-[15px] overflow-hidden select-none
@@ -114,38 +131,11 @@ function Text_box({ /*text_appear_state,*/ texts, channel, character, color, onC
   )
 }
 
-function Chat_container({ /*text_appear_state_change,*/ text_auto_play, texts, channel, character, color }) {
-  //const text_appear_state = useState(0)
-  //const text_appear_state = useContext(Text_appear_state_context)
-  //const skip_text = useState(false)
-  // useEffect(() => {
-  //   if (text_auto_play[0] == 0) { return }
-  //   if (text_appear_state[0] == 0) { return }
-  //   //text_appear_state_change(text_appear_state[0])
-  // }, [text_appear_state[0]])
-
-  // useEffect(()=>{
-  //   const handleKeyDown = (event) => {
-  //     if (text_appear_state[0] == 1) { return }
-  //     if (event.code !== 'Space' || event.code !== 'Enter') { return }
-  //     text_appear_state_change(1)
-  //   };
-  //   window.addEventListener('keydown', handleKeyDown);
-  //   return () => { window.removeEventListener('keydown', handleKeyDown); };
-  // },[text_auto_play[0]])
-
+function Chat_container({  texts, channel, character, color, img_src }) {
   return (
     <div className="Chat_container w-[90%] flex flex-col justify-center">
-      <Img_box img_src={'/000776 shinomiya runa trpg jk graduration ver v0.4.png'} />
-      <Text_box /*text_appear_state={text_appear_state}*/ texts={texts} channel={channel} character={character} color={color}
-      onClick={()=>{
-        // console.log('Text_box\n onClick')
-        // if (text_auto_play[0] == 1) {return}
-        // if (text_appear_state[0] == 0) { return }
-        // text_appear_state_change(1)  
-        
-      }}
-        />
+      <Img_box img_src={img_src} />
+      <Text_box texts={texts} channel={channel} character={character} color={color} />
     </div>
     
   );
@@ -163,10 +153,14 @@ async function text_appear({log_json, text_index, text_appear_state, text_auto_p
   text_appear_state[1](0)
 }
 
-function RPG_player({log_json = [], current_index, onClose}) {
+function RPG_player({ log_json = [], log_charactors= [], current_index, onClose}) {
+  const lang = useContext(LangContext);
   const text_appear_state = useState(0)
   const text_index = useState(current_index)
   const text_auto_play = useState(1)
+  const text_appear_speed = useState(40)
+  const speeds = [40, 25, 12, 150, 100];
+  const [speedIndex, setSpeedIndex] = useState(0);
   //const texts = useState(test_log_json[current_index].message)
   //'「おはようございます、皆さん。私は紫宮るなです。」\n「今日は、皆さんと一緒にTRPGをプレイすることを楽しみにしています。」'
 
@@ -175,37 +169,56 @@ function RPG_player({log_json = [], current_index, onClose}) {
     if (text_auto_play[0] === 0) { return }
     console.log('RPG_player useEffect \n', (log_json[text_index[0]]?.message ?? '').replace(/\s/g, ''))
     text_appear({log_json, text_index, text_appear_state, text_auto_play})
+    console.log('log_charactors', log_charactors)
   }, [text_appear_state[0]]);
 
   return (
     <div className="RPG_player absolute w-[100%] h-[100%] flex flex-col items-center">
-      <Text_appear_speed.Provider value={50}>
+      <Text_appear_speed.Provider value={text_appear_speed}>
         <Text_index.Provider value={text_index}>
-          <Log_json_context.Provider value={log_json}>
-            <Text_auto_play_context.Provider value={text_auto_play}>
-              <Text_appear_state_context.Provider value={text_appear_state}>
-                <Chat_container 
-                  texts={log_json[text_index[0]]?.message??''}
-                  channel={log_json[text_index[0]]?.channel.split('[')[1].split(']')[0]??''} 
-                  character={log_json[text_index[0]]?.character??''}
-                  color={log_json[text_index[0]]?.color??''}
-                  text_auto_play={text_auto_play}
-                  // text_appear_state_change={(v)=>{
-                  //   if(v==1){
-                  //     //text_appear_state[1](1)
-                  //     // console.log('Chat_container\n text_appear_state changed to 1')
-                  //   }else{
+          <Log_charactors_context.Provider value={log_charactors}>
+            <Log_json_context.Provider value={log_json}>
+              <Text_auto_play_context.Provider value={text_auto_play}>
+                <Text_appear_state_context.Provider value={text_appear_state}>
+                  <Chat_container 
+                    texts={log_json[text_index[0]]?.message??''}
+                    channel={log_json[text_index[0]]?.channel.split('[')[1].split(']')[0]??''} 
+                    character={
+                      /*log_json[text_index[0]]?.character??''*/
+                      log_charactors.find((c) => c.character == log_json[text_index[0]]?.character).character ??''
+                    }
+                    color={
+                      log_charactors.find((c) => c.character == log_json[text_index[0]]?.character).color
+                    }
+                    img_src={'/000776 shinomiya runa trpg jk graduration ver v0.4.png'}
+                    text_auto_play={text_auto_play} />
+                  <div className="Close_button absolute top-[5px] right-[5px] p-[5px] flex gap-[5px]" >
+                    
+                      <div className="h-[40px] flex justify-center items-center rounded-[5px] cursor-pointer text-[12px] 
+                    px-[15px] hover:bg-[#77777740]  transition-all duration-[2.5s] " onClick={() => {
+                          setSpeedIndex((speedIndex + 1) % speeds.length);
+                          text_appear_speed[1](speeds[speedIndex]);
+                        }}>
+                        <Tran text={'TEXT SPEED'} lang={lang[0]} /> x {Math.round(40 / text_appear_speed[0] * 100) / 100}
+                      </div>
+                    
+
+                    <div className="h-[40px] flex justify-center items-center rounded-[5px] cursor-pointer text-[12px]
+                    px-[15px] hover:bg-[#77777740]  transition-all duration-[2.5s] " onClick={() => {
+                      text_auto_play[1](text_auto_play[0] == 1 ? 0 : 1)
+                    }}>
+                      {text_auto_play[0] == 1 ? <Tran text={'AUTO TEXT'} lang={lang[0]} /> : <Tran text={'MANUAL TEXT'} lang={lang[0]} />}
+                    </div>
+                    
+
+                    <div className="w-[40px] h-[40px] flex justify-center items-center rounded-[5px] cursor-pointer g_i" onClick={onClose}>close</div>
+                    
+                  </div>
                       
-                  //     console.log('Chat_container\n text_appear_state changed to 0')
-                  //   }
-                  // }} 
-                  />
-                <div className="Close_button absolute top-[5px] right-[5px] p-[5px] 
-                w-[40px] h-[40px] flex justify-center items-center rounded-[5px] cursor-pointer g_i"
-                  onClick={onClose}>close</div>
-              </Text_appear_state_context.Provider>
-            </Text_auto_play_context.Provider>
-          </Log_json_context.Provider>
+                </Text_appear_state_context.Provider>
+              </Text_auto_play_context.Provider>
+            </Log_json_context.Provider>
+          </Log_charactors_context.Provider>
         </Text_index.Provider>
       </Text_appear_speed.Provider>
     </div>

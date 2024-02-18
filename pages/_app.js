@@ -44,6 +44,7 @@ export default function App({ Component, pageProps }) {
         <title>TRPG Replayer</title>
         <meta name="description" content="A simple tool to replay your TRPG sessions" />
         <link rel="icon" href="/trpg_viewer.png" />
+        <link rel="manifest" href="/manifest.json"></link>
         <meta name="google-site-verification" content="BdxyJCq7aElHFBmxY2TgBw6CAxDtN2LeMLqP2F7qlLw" />
     </Head>
       <TooltipProvider>

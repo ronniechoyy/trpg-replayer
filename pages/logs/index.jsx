@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { createRef, useState, useEffect, useContext } from "react";
 import { LangContext } from "../_app";
 import Head from "next/head";
+import PWA_install_but from "@/components/PWA_install_but";
 
 
 function Replay_handler() {
@@ -221,23 +222,29 @@ export default function Logs() {
                 <div className="text-[15px]">by RONI</div>
                 <img className="w-[20px] object-contain invert" src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="RONI GIT" /></Link>
             </div>
+
             
-            <div className=" flex gap-[0px]">
-              <div className="text-[18px] g_i">language</div>
-              <select className="text-[15px] text-right bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id="" 
-              value={lang[0]} onChange={(v) => { lang[1](v.target.value) }}>
-                <option value="zh-TW"><Tran text={'Traditional Chinese'} lang={lang[0]} /></option>
-                <option value="en"><Tran text={'English'} lang={lang[0]} /></option>
-                <option value="ja"><Tran text={'Japanese'} lang={lang[0]} /></option>
-                <option value="es"><Tran text={'Spanish'} lang={lang[0]} /></option>
-                <option value="fr"><Tran text={'French'} lang={lang[0]} /></option>
-                <option value="de"><Tran text={'German'} lang={lang[0]} /></option>
-                <option value="it"><Tran text={'Italian'} lang={lang[0]} /></option>
-                <option value="pt"><Tran text={'Portuguese'} lang={lang[0]} /></option>
-                <option value="ru"><Tran text={'Russian'} lang={lang[0]} /></option>
-                <option value="ar"><Tran text={'Arabic'} lang={lang[0]} /></option>
-                <option value="hi"><Tran text={'Hindi'} lang={lang[0]} /></option>
-              </select>
+            
+            <div className=" flex gap-[15px]">
+              <PWA_install_but />
+              <div className="flex gap-[0px] ">
+                <div className="text-[18px] g_i">language</div>
+                <select className="text-[15px] text-center bg-[#00000000] [&>*]:bg-[#00000000] focus:bg-[#555]" name="lang" id=""
+                  value={lang[0]} onChange={(v) => { lang[1](v.target.value) }}>
+                  <option value="zh-TW"><Tran text={'Traditional Chinese'} lang={lang[0]} /></option>
+                  <option value="en"><Tran text={'English'} lang={lang[0]} /></option>
+                  <option value="ja"><Tran text={'Japanese'} lang={lang[0]} /></option>
+                  <option value="es"><Tran text={'Spanish'} lang={lang[0]} /></option>
+                  <option value="fr"><Tran text={'French'} lang={lang[0]} /></option>
+                  <option value="de"><Tran text={'German'} lang={lang[0]} /></option>
+                  <option value="it"><Tran text={'Italian'} lang={lang[0]} /></option>
+                  <option value="pt"><Tran text={'Portuguese'} lang={lang[0]} /></option>
+                  <option value="ru"><Tran text={'Russian'} lang={lang[0]} /></option>
+                  <option value="ar"><Tran text={'Arabic'} lang={lang[0]} /></option>
+                  <option value="hi"><Tran text={'Hindi'} lang={lang[0]} /></option>
+                </select>
+              </div>
+              
               {/*<div className="text-[18px] text-right"><Tran text={'My logs'} lang={lang[0]} /></div>*/}
             </div>
             
