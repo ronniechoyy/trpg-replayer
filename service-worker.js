@@ -5,7 +5,9 @@ self.addEventListener('install', event => {
             return cache.addAll([
                 '/_app',
                 // add more URLs to cache
-            ]);
+            ]).catch(error => {
+                console.error('Failed to cache resources:', error);
+            });
         })
     );
 });

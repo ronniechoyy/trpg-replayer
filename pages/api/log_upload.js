@@ -9,11 +9,12 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+
 const s3_token = {
-  token_value: 'JQgxoRprtOU0O6yvhHbyAVcsOHn-64B1iZ6FuxQL',
-  Access_Key_ID: '45d6ced2cf5bea6c983f7d7c3ca98f63',
-  Secret_Access_Key: 'b57ccbc231d24b9eed470d3e835f4dda470c2bbeff8786866d2ae9cf696c4c88',
-  Use_jurisdiction_specific_endpoints_for_S3_clients: 'https://81d1c387ae574ede1de60640b395f109.r2.cloudflarestorage.com'
+  token_value: process.env.TOKEN_VALUE,
+  Access_Key_ID: process.env.ACCESS_KEY_ID,
+  Secret_Access_Key: process.env.SECRET_ACCESS_KEY,
+  Use_jurisdiction_specific_endpoints_for_S3_clients: process.env.ENDPOINTS
 }
 
 const S3 = new S3Client({
