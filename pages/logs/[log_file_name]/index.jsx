@@ -532,7 +532,7 @@ function Timeline_controler({ lang, timeline, setTimeline, scrollUpdater, setScr
       onTouchEnd={handleEnd}>
       <div className="text-[13px] z-[1] select-none flex gap-[5px] justify-center">
         <div><Tran text={'Progress rate'} lang={lang} />{` ${Math.round(localTimeline * 100)} %`}</div>
-        <div>{log_json.length ? `#${Math.round(localTimeline * log_json.length)}` : ''}</div>
+        <div>{log_json.length ? `#${Math.round(localTimeline * log_json.length)} / ${log_json.length}` : ''}</div>
       </div>
       <div className="timeline_handler absolute bg-[#555] h-[90%] rounded-[5px] m-[2px]" style={{ width: `${localTimeline * max}%` }}></div>
     </div>
@@ -951,7 +951,7 @@ function Log_reader({ log_file_name}){
               <T_tooltip title={
                 <div className="flex items-center gap-[5px]">
                   <div className="text-[25px] g_i">play_arrow</div>
-                  <div className="text-[13px]"><Tran text={'Play from current place'} lang={lang[0]} /></div>
+                  <div className="text-[13px]"><Tran text={`Play from current place`} lang={lang[0]} />{` #${currentIndex}`}</div>
                 </div>
               }>
                 <div className="bg-[#333] hover:bg-[#555] shadow-[inset_0px_0px_0px_2px_#333]
@@ -994,10 +994,9 @@ function Log_reader({ log_file_name}){
       </div>
       {rpg_player_open_state[0]==true && 
         <div className=" fixed inset-0 bg-[#00000079] backdrop-blur-[2px] text-[#eee] gap-[5px] flex flex-col p-[5px] text-left z-[2]">
-          <RPG_player current_index={currentIndex} log_json={log_json[0]} />
-          <div className="Close_button absolute top-[5px] right-[5px] p-[5px] 
-          w-[40px] h-[40px] flex justify-center items-center rounded-[5px] cursor-pointer g_i" 
-          onClick={() => { rpg_player_open_state[1](false) }}>close</div>
+          <RPG_player current_index={currentIndex} log_json={log_json[0]} onClose={()=>{
+            rpg_player_open_state[1](false)
+          }} />
         </div>}
       
     </>
