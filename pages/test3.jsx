@@ -12,7 +12,7 @@ export default function Test2() {
         <link rel="icon" href="/trpg_viewer.png" />
       </Head>
       <div className=" fixed inset-0 bg-[#333] text-[#eee] gap-[5px] flex flex-col p-[5px]">
-        <RPG_player current_index={0} log_json={[]} log_charactors={[]}  />
+        {/*<RPG_player current_index={0} log_json={[]} log_charactors={[]}  />*/}
       </div>
       
     </>
