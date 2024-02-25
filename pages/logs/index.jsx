@@ -34,7 +34,7 @@ function Replay_handler() {
   }, []);
 
   return (
-    <div className="replay_container @container flex-grow bg-[#333]  rounded-[5px] flex flex-col gap-[10px] p-[10px]">
+    <div className="replay_container @container flex-grow bg-[#333]  rounded-[5px] flex flex-col gap-[5px] p-[5px]">
       {
         files.filter(file => ['json', 'html', 'txt'].includes(file.split('.').pop())).length === 0 ? (
           <div className="h-[100%] w-[100%] text-[#999]">
@@ -211,7 +211,7 @@ export default function Logs() {
         <title>Logs - TRPG Replayer</title>
       </Head>
       <div className=" absolute inset-0 bg-[#333] text-[#eee]">
-        <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px]">
+        <div className="flex flex-col text-center justify-center items-center p-[5px] gap-[5px] absolute inset-0">
           <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px_10px] text-[15px] @[400px]:text-[20px] flex justify-between items-center gap-[5px] @container">
 
             <div className="flex flex-col @[400px]:flex-row gap-[15px]">
@@ -249,7 +249,7 @@ export default function Logs() {
             </div>
             
           </div>
-          <div className="bg-[#555] w-[100%] rounded-[5px] p-[10px] text-[25px] flex flex-col gap-[5px]">
+          <div className="bg-[#555] w-[100%] rounded-[5px] p-[5px] text-[25px] flex flex-col gap-[5px] relative h-[100%]">
 
             <div className="flex gap-[5px] text-[15px]">
               <Butthole theme={'dark'} className={'p-[12px] flex flex-col justify-center gap-[5px] w-[100%]'} onClick={() => { uploader_state[1](true) }}>
